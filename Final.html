@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kološ Tracker - Online iOS</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #F2F2F7;
+            --card-bg: #FFFFFF;
+            --primary: #007AFF;
+            --primary-hover: #005ecb;
+            --text-main: #1C1C1E;
+            --text-muted: #8E8E93;
+            --low: #34C759;
+            --medium: #FF9500;
+            --high: #FF3B30;
+            --border: #E5E5EA;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 30px;
+            color: var(--text-main);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container { width: 100%; max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+        h1 { font-size: 32px; font-weight: 700; margin: 0; padding-bottom: 10px; color: var(--text-main); }
+        h2 { font-size: 24px; font-weight: 600; margin-top: 0; }
+
+        .tabs { display: flex; flex-wrap: wrap; background-color: #E3E3E8; padding: 4px; border-radius: 12px; width: fit-content; margin-bottom: 10px; }
+        .tabs button { padding: 10px 24px; background: transparent; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; color: var(--text-muted); cursor: pointer; transition: all 0.2s ease; }
+        .tabs button.active { background: var(--card-bg); color: var(--text-main); box-shadow: 0 3px 8px rgba(0,0,0,0.12), 0 3px 1px rgba(0,0,0,0.04); }
+
+        .sub-tabs { background-color: transparent; padding: 0; border-bottom: 2px solid var(--border); border-radius: 0; width: 100%; margin-bottom: 20px; }
+        .sub-tabs button { border-radius: 0; padding: 12px 20px; margin-bottom: -2px; border-bottom: 2px solid transparent; }
+        .sub-tabs button.active { background: transparent; box-shadow: none; color: var(--primary); border-bottom: 2px solid var(--primary); }
+
+        .section { display: none; animation: fadeIn 0.3s ease-in-out; }
+        .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .card { background-color: var(--card-bg); border-radius: 16px; padding: 30px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04); margin-bottom: 24px; overflow-x: auto; }
+        .form-group { margin-bottom: 24px; }
+        label { display: block; font-weight: 600; margin-bottom: 10px; font-size: 17px; color: var(--text-main); }
+        select, input[type="text"] { width: 100%; max-width: 400px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 12px; font-size: 17px; background: var(--bg-color); color: var(--text-main); outline: none; transition: border 0.2s; font-family: inherit; }
+        select:focus, input[type="text"]:focus { border-color: var(--primary); }
+
+        .badge { display: inline-block; padding: 6px 14px; border-radius: 20px; color: white; font-weight: 600; font-size: 14px; }
+        .badge.low { background-color: var(--low); }
+        .badge.medium { background-color: var(--medium); color: white; }
+        .badge.high { background-color: var(--high); }
+
+        .cages-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-top: 15px; }
+        .cage-item { background: var(--bg-color); padding: 20px; border-radius: 14px; display: flex; align-items: center; cursor: pointer; font-size: 17px; font-weight: 500; transition: all 0.2s ease; border: 2px solid transparent; }
+        .cage-item:hover { background: #E5E5EA; }
+        .cage-item:has(input:checked) { background: rgba(0, 122, 255, 0.1); border: 2px solid var(--primary); color: var(--primary); }
+        .cage-item input { margin-right: 15px; width: 22px; height: 22px; accent-color: var(--primary); cursor: pointer; }
+
+        .btn { display: inline-block; padding: 16px 32px; background-color: var(--primary); color: white; border: none; border-radius: 14px; font-size: 17px; font-weight: 600; cursor: pointer; transition: background-color 0.2s, transform 0.1s; }
+        .btn:hover { background-color: var(--primary-hover); }
+        .btn:active { transform: scale(0.98); }
+        .btn-success { background-color: var(--low); width: 100%; margin-bottom: 10px; }
+        .btn-danger { background-color: var(--high); width: 100%; }
+        .btn-secondary { background-color: var(--text-main); padding: 10px 20px; font-size: 15px; }
+
+        #result-box { display: none; margin-top: 24px; padding: 24px; background: #F2F9FF; border: 2px solid #D0E8FF; border-radius: 16px; }
+        #result-box h3 { margin-top: 0; color: var(--primary); }
+        #sample-stats { font-size: 15px; color: var(--text-main); margin-top: 15px; margin-bottom: 20px; font-weight: 500;}
+        #sample-list { list-style: none; padding: 0; margin: 15px 0; }
+        
+        .audit-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 10px; font-size: 17px; font-weight: 500; }
+        .audit-item label { margin: 0; display: flex; align-items: center; color: var(--high); cursor: pointer; font-size: 16px; }
+        .audit-item input[type="checkbox"] { margin-right: 10px; width: 22px; height: 22px; accent-color: var(--high); }
+
+        .stats-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .stats-table th { text-align: left; padding: 12px 16px; color: var(--text-muted); font-size: 14px; font-weight: 600; border-bottom: 2px solid var(--border); }
+        .stats-table td { padding: 16px; border-bottom: 1px solid var(--border); font-size: 16px; font-weight: 500; vertical-align: middle; }
+        .stats-table tr:hover td { background-color: var(--bg-color); }
+        .stats-table tr:last-child td { border-bottom: none; }
+        
+        .header-flex { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
+        .admin-row { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+        .admin-row input, .admin-row select { flex: 1; min-width: 200px; }
+        .btn-delete { background: transparent; border: none; color: var(--high); font-size: 20px; cursor: pointer; transition: transform 0.2s; }
+        .btn-delete:hover { transform: scale(1.2); }
+
+        .history-card { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 30px; }
+        .history-header { background-color: var(--primary); color: white; padding: 15px 20px; font-size: 18px; font-weight: 600; text-transform: capitalize; }
+        .history-card .stats-table { margin-top: 0; }
+        
+        /* Заглушка загрузки */
+        #loading-indicator {
+            text-align: center; padding: 20px; color: var(--text-muted); font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🛒 Kološ Tracker <span style="font-size: 14px; font-weight: normal; color: var(--low);">● Online</span></h1>
+    
+    <div class="tabs">
+        <button id="tab-audit" class="active" onclick="switchTab('audit')">📝 Audit Kološů</button>
+        <button id="tab-stats" onclick="switchTab('stats')">📊 Statistika (Měsíc)</button>
+        <button id="tab-data" onclick="switchTab('data')">📂 Data (Historie & All-time)</button>
+        <button id="tab-settings" onclick="switchTab('settings')">⚙️ Zaměstnanci</button>
+    </div>
+
+    <div id="sec-audit" class="section active">
+        <div class="card">
+            <div class="form-group">
+                <label>Vyber zaměstnance:</label>
+                <select id="worker-select" onchange="updateWorkerRisk()"></select>
+                <div id="worker-risk-display" style="margin-top: 10px;"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="form-group">
+                <label>Hotové klece za dnes:</label>
+                <div class="cages-grid" id="cages-list"></div>
+            </div>
+            <button class="btn" onclick="generateSample()">Vygenerovat Sample 🎲</button>
+        </div>
+
+        <div id="result-box">
+            <h3>🔍 Klece na otestování (inventura):</h3>
+            <p id="sample-stats"></p>
+            <p style="font-size: 15px; color: var(--text-muted); margin-bottom: 10px;">Pokud najdeš chybu, zaklikni ji u dané klece:</p>
+            <ul id="sample-list"></ul>
+            <div style="margin-top: 25px;">
+                <button class="btn" style="width: 100%;" onclick="finishAudit()">💾 Uložit výsledek kontroly</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="sec-stats" class="section">
+        <div class="card">
+            <div class="header-flex">
+                <div>
+                    <h2>Statistika zaměstnanců (Aktuální měsíc) 🏆</h2>
+                    <p style="color: var(--text-muted); font-size: 14px; margin: 5px 0 0 0;">Chybovost = (Chyby / Hotové klece) × 100</p>
+                </div>
+                <button class="btn btn-secondary" onclick="closeMonth()">📅 Uzavřít měsíc</button>
+            </div>
+            <table class="stats-table">
+                <thead><tr><th>Zaměstnanec</th><th>Klece celkem</th><th>Počet chyb</th><th>Chybovost (%)</th><th>Aktuální Risk</th></tr></thead>
+                <tbody id="stats-worker-list"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="sec-data" class="section">
+        <div class="card">
+            <h2>Archiv a Globální data 🗂️</h2>
+            <div class="tabs sub-tabs">
+                <button id="subtab-history" class="active" onclick="switchDataSubTab('history')">📅 Měsíční historie</button>
+                <button id="subtab-alltime" onclick="switchDataSubTab('alltime')">🌍 Celková statistika (All-time)</button>
+            </div>
+            <div id="view-history">
+                <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">Zde se ukládají statistiky po uzavření každého měsíce.</p>
+                <div id="history-container"><div id="loading-indicator">Načítání dat z cloudu...</div></div>
+            </div>
+            <div id="view-alltime" style="display: none;">
+                <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">Součet všech klecí a chyb za celou dobu působení zaměstnance.</p>
+                <table class="stats-table">
+                    <thead><tr><th>Zaměstnanec</th><th>Klece (All-time)</th><th>Chyby (All-time)</th><th>Chybovost (All-time)</th></tr></thead>
+                    <tbody id="alltime-worker-list"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="sec-settings" class="section">
+        <div class="card">
+            <h2>Správa zaměstnanců</h2>
+            <div class="form-group admin-row">
+                <input type="text" id="new-worker-name" placeholder="Jméno a příjmení">
+                <select id="new-worker-risk">
+                    <option value="low">Low (10%)</option>
+                    <option value="medium">Medium (30%)</option>
+                    <option value="high">High (50%)</option>
+                </select>
+                <button class="btn btn-secondary" style="border-radius: 12px;" onclick="addWorker()">Přidat do cloudu</button>
+            </div>
+            <table class="stats-table">
+                <thead><tr><th>Zaměstnanec</th><th>Nastavený Risk</th><th style="text-align: right;">Akce</th></tr></thead>
+                <tbody id="admin-worker-list"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 1. ИНИЦИАЛИЗАЦИЯ FIREBASE (Твои ключи!)
+    const firebaseConfig = {
+        apiKey: "AIzaSyCMjmQV5fKHVk_QUVMXi8uURNJC2uiWhsE",
+        authDomain: "kolos-tracker.firebaseapp.com",
+        databaseURL: "https://kolos-tracker-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "kolos-tracker",
+        storageBucket: "kolos-tracker.firebasestorage.app",
+        messagingSenderId: "407506999377",
+        appId: "1:407506999377:web:8e0833bc4787fc7eba8070",
+        measurementId: "G-NN9KD2GEHP"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // 2. ЛОКАЛЬНЫЕ ПЕРЕМЕННЫЕ (Будут заполняться из базы)
+    let workers = [];
+    let historyData = [];
+    let currentAuditCagesCount = 0; 
+    const riskRates = { 'low': 0.10, 'medium': 0.30, 'high': 0.50 };
+
+    const cageCategories = [
+        "Mléčné výrobky (Chlaďák)", "Ovoce a Zelenina", "Pečivo a chléb",
+        "Trvanlivé potraviny", "Drogerie a chemie", "Alkohol",
+        "Mražené zboží", "Sladkosti a snacky", "Nápoje (Vody/Limo)",
+        "Maso a uzeniny", "Domácí potřeby", "Zverimex (Krmivo)"
+    ];
+
+    // 3. ПОДКЛЮЧЕНИЕ К БАЗЕ В РЕАЛЬНОМ ВРЕМЕНИ
+    db.ref('workers').on('value', (snapshot) => {
+        const data = snapshot.val();
+        workers = [];
+        if (data) {
+            for (let key in data) {
+                workers.push({ id: key, ...data[key] });
+            }
+        }
+        // Обновляем весь UI, так как данные могли прийти от другого устройства
+        renderWorkerSelect();
+        renderAdminWorkers();
+        renderStats();
+        renderAllTimeStats();
+        updateWorkerRisk();
+    });
+
+    db.ref('history').on('value', (snapshot) => {
+        const data = snapshot.val();
+        historyData = [];
+        if (data) {
+            for (let key in data) {
+                historyData.push({ id: key, ...data[key] });
+            }
+        }
+        historyData.sort((a, b) => b.timestamp - a.timestamp); // Сортируем от новых к старым
+        renderHistory();
+    });
+
+    // 4. ФУНКЦИИ ИНТЕРФЕЙСА
+    function init() {
+        renderCages();
+    }
+
+    function switchTab(tab) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.tabs > button').forEach(b => b.classList.remove('active')); 
+        document.getElementById('sec-' + tab).classList.add('active');
+        document.getElementById('tab-' + tab).classList.add('active');
+    }
+
+    function switchDataSubTab(subTab) {
+        document.getElementById('view-history').style.display = subTab === 'history' ? 'block' : 'none';
+        document.getElementById('view-alltime').style.display = subTab === 'alltime' ? 'block' : 'none';
+        document.getElementById('subtab-history').classList.toggle('active', subTab === 'history');
+        document.getElementById('subtab-alltime').classList.toggle('active', subTab === 'alltime');
+    }
+
+    function renderWorkerSelect() {
+        const select = document.getElementById('worker-select');
+        let currentValue = select.value; // Запоминаем выбор
+        select.innerHTML = '';
+        
+        if (workers.length === 0) {
+            select.innerHTML = `<option value="">-- Přidejte zaměstnance v nastavení --</option>`;
+            select.disabled = true;
+            return;
+        }
+        select.disabled = false;
+        workers.forEach(w => {
+            select.innerHTML += `<option value="${w.id}">${w.name}</option>`;
+        });
+        
+        if(currentValue && workers.find(w => w.id === currentValue)) {
+            select.value = currentValue; // Восстанавливаем выбор
+        }
+    }
+
+    function updateWorkerRisk() {
+        const select = document.getElementById('worker-select');
+        const display = document.getElementById('worker-risk-display');
+        document.getElementById('result-box').style.display = 'none'; 
+        
+        if(workers.length === 0 || select.value === "") {
+            display.innerHTML = `<span class="badge" style="background: #8E8E93; color: white;">Žádná data</span>`;
+            return;
+        }
+        const worker = workers.find(w => w.id === select.value);
+        if(!worker) return;
+        
+        const percentage = riskRates[worker.risk] * 100;
+        display.innerHTML = `<span class="badge ${worker.risk}">Risk: ${worker.risk.toUpperCase()} (${percentage}%)</span>`;
+    }
+
+    function renderCages() {
+        const grid = document.getElementById('cages-list');
+        grid.innerHTML = '';
+        cageCategories.forEach((cat) => {
+            grid.innerHTML += `<label class="cage-item"><input type="checkbox" value="${cat}" class="cage-checkbox">${cat}</label>`;
+        });
+    }
+
+    function generateSample() {
+        const select = document.getElementById('worker-select');
+        if(workers.length === 0 || select.value === "") return alert('Přidej zaměstnance v nastavení!');
+        
+        const worker = workers.find(w => w.id === select.value);
+        const checkboxes = document.querySelectorAll('.cage-checkbox:checked');
+        const doneCages = Array.from(checkboxes).map(cb => cb.value);
+
+        if (doneCages.length === 0) return alert('Vyber alespoň jednu klec!');
+        
+        currentAuditCagesCount = doneCages.length; 
+        const rate = riskRates[worker.risk];
+        let sampleSize = Math.ceil(doneCages.length * rate);
+        const shuffled = doneCages.sort(() => 0.5 - Math.random());
+        const selectedSample = shuffled.slice(0, sampleSize);
+
+        const resBox = document.getElementById('result-box');
+        const list = document.getElementById('sample-list');
+        
+        list.innerHTML = '';
+        selectedSample.forEach(item => {
+            list.innerHTML += `
+                <li class="audit-item">
+                    <span>📍 ${item}</span>
+                    <label><input type="checkbox" class="error-checkbox"> Chyba</label>
+                </li>
+            `;
+        });
+        document.getElementById('sample-stats').innerHTML = `Uděláno celkem: <strong>${doneCages.length}</strong> | Úroveň rizika: <strong>${worker.risk.toUpperCase()}</strong> | K otestování: <strong>${sampleSize}</strong>`;
+        resBox.style.display = 'block';
+        resBox.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+    
+    // 5. ФУНКЦИИ ИЗМЕНЕНИЯ БАЗЫ ДАННЫХ (FIREBASE)
+    function finishAudit() {
+        const select = document.getElementById('worker-select');
+        const workerId = select.value;
+        const worker = workers.find(w => w.id === workerId);
+        
+        const errorsCount = document.querySelectorAll('.error-checkbox:checked').length;
+        
+        // Обновляем данные конкретного работника в облаке!
+        db.ref('workers/' + workerId).update({
+            totalCages: worker.totalCages + currentAuditCagesCount,
+            errors: worker.errors + errorsCount,
+            allTimeCages: worker.allTimeCages + currentAuditCagesCount,
+            allTimeErrors: worker.allTimeErrors + errorsCount
+        });
+        
+        document.querySelectorAll('.cage-checkbox').forEach(cb => cb.checked = false);
+        document.getElementById('result-box').style.display = 'none';
+        
+        if (errorsCount > 0) alert(`Uloženo online! ${worker.name} udělal ${errorsCount} chyb(y). Šel si pro kartáč! 🤬`);
+        else alert(`Uloženo online! ${worker.name} je čistej (0 chyb). Dobrá práce! 🎉`);
+        
+        currentAuditCagesCount = 0;
+    }
+
+    function addWorker() {
+        const nameInput = document.getElementById('new-worker-name');
+        const name = nameInput.value.trim();
+        const risk = document.getElementById('new-worker-risk').value;
+        if (!name) return alert('Zadejte jméno!');
+        
+        // Отправляем нового работника в облако
+        db.ref('workers').push({
+            name: name, risk: risk, totalCages: 0, errors: 0, allTimeCages: 0, allTimeErrors: 0
+        });
+        
+        nameInput.value = '';
+        alert("Zaměstnanec přidán do cloudu!");
+    }
+
+    function removeWorker(id, name) {
+        if (confirm(`Opravdu chcete smazat zaměstnance: ${name}? Zmizí ze všech zařízení.`)) {
+            // Удаляем из облака
+            db.ref('workers/' + id).remove();
+        }
+    }
+
+    function closeMonth() {
+        if (!confirm("Opravdu chcete uzavřít měsíc?\nData budou odeslána do cloudu, rizika se přehodnotí a statistiky se vynulují na všech zařízeních!")) return;
+
+        const dateNow = new Date();
+        const monthName = dateNow.toLocaleDateString('cs-CZ', { month: 'long', year: 'numeric' });
+        
+        // Очищаем массив от ключа id перед сохранением истории, чтобы было чище
+        const snapshotWorkers = workers.map(w => {
+            return { name: w.name, risk: w.risk, totalCages: w.totalCages, errors: w.errors };
+        });
+        
+        // 1. Пушим историю в облако
+        db.ref('history').push({
+            month: monthName,
+            timestamp: dateNow.getTime(),
+            workers: snapshotWorkers
+        });
+
+        // 2. Обнуляем стату всем через пакетное обновление
+        const updates = {};
+        workers.forEach(w => {
+            let newRisk = w.risk;
+            if (w.totalCages > 0) {
+                let errorRate = (w.errors / w.totalCages) * 100;
+                if (errorRate < 5) newRisk = 'low';
+                else if (errorRate <= 15) newRisk = 'medium';
+                else newRisk = 'high';
+            }
+            updates['workers/' + w.id + '/totalCages'] = 0;
+            updates['workers/' + w.id + '/errors'] = 0;
+            updates['workers/' + w.id + '/risk'] = newRisk;
+        });
+        db.ref().update(updates);
+        
+        alert("✅ Měsíc byl úspěšně uzavřen v cloudu!");
+    }
+
+    // 6. ОТОБРАЖЕНИЕ ТАБЛИЦ
+    function renderStats() {
+        const tbody = document.getElementById('stats-worker-list');
+        tbody.innerHTML = '';
+        let rankedWorkers = workers.map(w => {
+            return { ...w, errorRate: w.totalCages > 0 ? (w.errors / w.totalCages) * 100 : 0 };
+        }).sort((a, b) => a.errorRate - b.errorRate);
+
+        rankedWorkers.forEach(w => {
+            let errorColor = w.errors > 0 ? 'var(--high)' : 'inherit';
+            tbody.innerHTML += `<tr><td><strong>${w.name}</strong></td><td>📦 ${w.totalCages}</td><td style="color: ${errorColor}; font-weight: 600;">${w.errors}</td><td>${w.errorRate.toFixed(1)}%</td><td><span class="badge ${w.risk}">${w.risk.toUpperCase()}</span></td></tr>`;
+        });
+    }
+
+    function renderAllTimeStats() {
+        const tbody = document.getElementById('alltime-worker-list');
+        tbody.innerHTML = '';
+        let allTimeRanked = workers.map(w => {
+            return { ...w, allTimeErrorRate: w.allTimeCages > 0 ? (w.allTimeErrors / w.allTimeCages) * 100 : 0 };
+        }).sort((a, b) => a.allTimeErrorRate - b.allTimeErrorRate); 
+
+        allTimeRanked.forEach(w => {
+            let errorColor = w.allTimeErrors > 0 ? 'var(--high)' : 'inherit';
+            tbody.innerHTML += `<tr><td><strong>${w.name}</strong></td><td>📦 ${w.allTimeCages}</td><td style="color: ${errorColor}; font-weight: 600;">${w.allTimeErrors}</td><td><strong>${w.allTimeErrorRate.toFixed(1)}%</strong></td></tr>`;
+        });
+    }
+
+    function renderHistory() {
+        const container = document.getElementById('history-container');
+        container.innerHTML = '';
+        if (historyData.length === 0) {
+            container.innerHTML = '<p style="color: var(--text-muted); font-size: 16px;">Zatím tu nic není. Uzavřete aktuální měsíc, aby se zde objevila data.</p>';
+            return;
+        }
+
+        historyData.forEach(record => {
+            let html = `<div class="history-card"><div class="history-header">📅 ${record.month}</div><table class="stats-table"><thead><tr><th>Zaměstnanec</th><th>Klece celkem</th><th>Chyby</th><th>Chybovost (%)</th><th>Risk na konci měsíce</th></tr></thead><tbody>`;
+            let sortedWorkers = (record.workers || []).map(w => {
+                w.errorRate = w.totalCages > 0 ? (w.errors / w.totalCages) * 100 : 0;
+                return w;
+            }).sort((a, b) => a.errorRate - b.errorRate);
+
+            sortedWorkers.forEach(w => {
+                let errorColor = w.errors > 0 ? 'var(--high)' : 'inherit';
+                html += `<tr><td><strong>${w.name}</strong></td><td>📦 ${w.totalCages}</td><td style="color: ${errorColor}; font-weight: 600;">${w.errors}</td><td>${w.errorRate.toFixed(1)}%</td><td><span class="badge ${w.risk}">${w.risk.toUpperCase()}</span></td></tr>`;
+            });
+            html += `</tbody></table></div>`;
+            container.innerHTML += html;
+        });
+    }
+
+    function renderAdminWorkers() {
+        const tbody = document.getElementById('admin-worker-list');
+        tbody.innerHTML = '';
+        workers.forEach(w => {
+            tbody.innerHTML += `<tr><td><strong>${w.name}</strong></td><td><span class="badge ${w.risk}">${w.risk.toUpperCase()}</span></td><td style="text-align: right;"><button class="btn-delete" onclick="removeWorker('${w.id}', '${w.name}')" title="Smazat">🗑️</button></td></tr>`;
+        });
+    }
+
+    init();
+</script>
+
+</body>
+</html>
