@@ -252,10 +252,29 @@
     const riskRates = { 'low': 0.10, 'medium': 0.30, 'high': 0.50 };
 
     const cageCategories = [
-        "Mléčné výrobky (Chlaďák)", "Ovoce a Zelenina", "Pečivo a chléb",
-        "Trvanlivé potraviny", "Drogerie a chemie", "Alkohol",
-        "Mražené zboží", "Sladkosti a snacky", "Nápoje (Vody/Limo)",
-        "Maso a uzeniny", "Domácí potřeby", "Zverimex (Krmivo)"
+        { id: "vyziva", name: "Dětská výživa", type: "standard" },
+        { id: "slehacky", name: "Šlehačky a ledové kávy", type: "standard" },
+        { id: "praci", name: "Prací prostředky", type: "standard" },
+        { id: "uklid", name: "Úklidové prostředky", type: "standard" },
+        { id: "intimni", name: "Intimní hygiena", type: "standard" },
+        { id: "osobni", name: "Osobní hygiena", type: "standard" },
+        { id: "nonfood", name: "NonFood", type: "standard" },
+        { id: "zradlo", name: "Zvířecí žrádlo", type: "standard" },
+        { id: "testoviny", name: "Těstoviny", type: "number" },
+        { id: "cerealie", name: "Cereálie", type: "number" },
+        { id: "sterilka", name: "Sterilka", type: "sub", subs: ["Ryby", "Konzervy", "Okurky"] },
+        { id: "kecupy", name: "Kečupy a omáčky", type: "standard" },
+        { id: "marmelady", name: "Marmelády a medy", type: "standard" },
+        { id: "koreni", name: "Koření", type: "standard" },
+        { id: "susenky", name: "Sušenky", type: "sub", subs: ["Čokolády", "Sušenky klasické", "Gumové bonbony"] },
+        { id: "mouky", name: "Mouky a cukry", type: "number" },
+        { id: "prasky", name: "Prášky na pečení", type: "standard" },
+        { id: "caje", name: "Čaje", type: "standard" },
+        { id: "kavy", name: "Kávy", type: "number" },
+        { id: "bio", name: "BIO výrobky", type: "standard" },
+        { id: "mezinarodni", name: "Mezinárodní zboží", type: "standard" },
+        { id: "oleje", name: "Oleje", type: "standard" },
+        { id: "bramburky", name: "Brambůrky", type: "standard" }
     ];
 
     // 3. ПОДКЛЮЧЕНИЕ К БАЗЕ В РЕАЛЬНОМ ВРЕМЕНИ
@@ -342,13 +361,37 @@
         display.innerHTML = `<span class="badge ${worker.risk}">Risk: ${worker.risk.toUpperCase()} (${percentage}%)</span>`;
     }
 
-    function renderCages() {
+ function renderCages() {
         const grid = document.getElementById('cages-list');
         grid.innerHTML = '';
         cageCategories.forEach((cat) => {
-            grid.innerHTML += `<label class="cage-item"><input type="checkbox" value="${cat}" class="cage-checkbox">${cat}</label>`;
+            if (cat.type === 'standard') {
+                grid.innerHTML += `<div class="cage-wrapper"><label class="cage-item"><input type="checkbox" value="${cat.name}" class="cage-checkbox standard-cage">${cat.name}</label></div>`;
+            } else if (cat.type === 'sub') {
+                let subsHtml = cat.subs.map(sub => `<label><input type="checkbox" value="${sub}" data-parent="${cat.name}" class="cage-checkbox sub-cage"> ${sub}</label>`).join('');
+                grid.innerHTML += `
+                    <div class="cage-wrapper">
+                        <label class="cage-item" style="margin-bottom:0;">
+                            <input type="checkbox" onchange="document.getElementById('exp_${cat.id}').style.display = this.checked ? 'block' : 'none'">
+                            ${cat.name} ▾
+                        </label>
+                        <div id="exp_${cat.id}" class="expand-box">${subsHtml}</div>
+                    </div>`;
+            } else if (cat.type === 'number') {
+                grid.innerHTML += `
+                    <div class="cage-wrapper">
+                        <label class="cage-item" style="margin-bottom:0;">
+                            <input type="checkbox" onchange="document.getElementById('exp_${cat.id}').style.display = this.checked ? 'block' : 'none'; if(!this.checked) document.getElementById('num_${cat.id}').value = '';">
+                            ${cat.name} ▾
+                        </label>
+                        <div id="exp_${cat.id}" class="expand-box">
+                            <label style="font-size: 14px; margin-bottom: 5px;">Zadej počet udělaných klecí:</label>
+                            <input type="number" id="num_${cat.id}" data-name="${cat.name}" class="cage-number" min="1" placeholder="Např. 2">
+                        </div>
+                    </div>`;
+            }
         });
-    }
+    };
 
     function generateSample() {
         const select = document.getElementById('worker-select');
