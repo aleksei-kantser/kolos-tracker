@@ -398,8 +398,34 @@
         if(workers.length === 0 || select.value === "") return alert('Přidej zaměstnance v nastavení!');
         
         const worker = workers.find(w => w.id === select.value);
-        const checkboxes = document.querySelectorAll('.cage-checkbox:checked');
-        const doneCages = Array.from(checkboxes).map(cb => cb.value);
+        let doneCages = [];
+        let errorMsg = null;
+
+        // 1. Собираем стандартные галочки
+        document.querySelectorAll('.standard-cage:checked').forEach(cb => doneCages.push(cb.value));
+        
+        // 2. Собираем подкатегории (Стерилка, Сушенки)
+        document.querySelectorAll('.sub-cage:checked').forEach(cb => {
+            doneCages.push(cb.getAttribute('data-parent') + " - " + cb.value);
+        });
+        
+        // 3. Собираем те, где нужно было ввести количество клецей
+        document.querySelectorAll('.cage-number').forEach(input => {
+            const isChecked = input.closest('.cage-wrapper').querySelector('.cage-item input').checked;
+            if (isChecked) {
+                const count = parseInt(input.value);
+                const name = input.getAttribute('data-name');
+                if (!count || count < 1) {
+                    errorMsg = `Nenapsal jsi počet klecí u kategorie: ${name}!`;
+                } else {
+                    for(let i = 1; i <= count; i++) {
+                        doneCages.push(name + " (Klec " + i + ")");
+                    }
+                }
+            }
+        });
+
+        if (errorMsg) return alert(errorMsg);
 
         if (doneCages.length === 0) return alert('Vyber alespoň jednu klec!');
         
