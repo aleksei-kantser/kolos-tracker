@@ -182,7 +182,7 @@
                 <button class="btn btn-secondary" onclick="closeMonth()">📅 Uzavřít měsíc</button>
             </div>
             <table class="stats-table">
-                <thead><tr><th>Zaměstnanec</th><th>Klece celkem</th><th>Počet chyb</th><th>Chybovost (%)</th><th>Aktuální Risk</th></tr></thead>
+                <thead><tr><th>Zaměstnanec</th><th>Klece celkem</th><th>Směny (dny)</th><th>Průměr / den</th><th>Počet chyb</th><th>Chybovost (%)</th><th>Aktuální Risk</th></tr></thead>
                 <tbody id="stats-worker-list"></tbody>
             </table>
         </div>
@@ -202,7 +202,7 @@
             <div id="view-alltime" style="display: none;">
                 <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">Součet všech klecí a chyb za celou dobu působení zaměstnance.</p>
                 <table class="stats-table">
-                    <thead><tr><th>Zaměstnanec</th><th>Klece (All-time)</th><th>Chyby (All-time)</th><th>Chybovost (All-time)</th></tr></thead>
+                    <thead><tr><th>Zaměstnanec</th><th>Klece (All-time)</th><th>Směny celkem</th><th>Průměr / den</th><th>Chyby (All-time)</th><th>Chybovost (All-time)</th></tr></thead>
                     <tbody id="alltime-worker-list"></tbody>
                 </table>
             </div>
@@ -460,12 +460,14 @@
         
         const errorsCount = document.querySelectorAll('.error-checkbox:checked').length;
         
-        // Обновляем данные конкретного работника в облаке!
+       // Обновляем данные конкретного работника в облаке!
         db.ref('workers/' + workerId).update({
             totalCages: worker.totalCages + currentAuditCagesCount,
             errors: worker.errors + errorsCount,
             allTimeCages: worker.allTimeCages + currentAuditCagesCount,
-            allTimeErrors: worker.allTimeErrors + errorsCount
+            allTimeErrors: worker.allTimeErrors + errorsCount,
+            shifts: (worker.shifts || 0) + 1,
+            allTimeShifts: (worker.allTimeShifts || 0) + 1
         });
         
         document.querySelectorAll('.cage-checkbox').forEach(cb => cb.checked = false);
@@ -485,7 +487,7 @@
         
         // Отправляем нового работника в облако
         db.ref('workers').push({
-            name: name, risk: risk, totalCages: 0, errors: 0, allTimeCages: 0, allTimeErrors: 0
+            name: name, risk: risk, totalCages: 0, errors: 0, allTimeCages: 0, allTimeErrors: 0, shifts: 0, allTimeShifts: 0
         });
         
         nameInput.value = '';
@@ -507,7 +509,7 @@
         
         // Очищаем массив от ключа id перед сохранением истории, чтобы было чище
         const snapshotWorkers = workers.map(w => {
-            return { name: w.name, risk: w.risk, totalCages: w.totalCages, errors: w.errors };
+            return { name: w.name, risk: w.risk, totalCages: w.totalCages, errors: w.errors, shifts: w.shifts || 0 };
         });
         
         // 1. Пушим историю в облако
@@ -529,6 +531,7 @@
             }
             updates['workers/' + w.id + '/totalCages'] = 0;
             updates['workers/' + w.id + '/errors'] = 0;
+            updates['workers/' + w.id + '/shifts'] = 0;
             updates['workers/' + w.id + '/risk'] = newRisk;
         });
         db.ref().update(updates);
@@ -546,7 +549,10 @@
 
         rankedWorkers.forEach(w => {
             let errorColor = w.errors > 0 ? 'var(--high)' : 'inherit';
-            tbody.innerHTML += `<tr><td><strong>${w.name}</strong></td><td>📦 ${w.totalCages}</td><td style="color: ${errorColor}; font-weight: 600;">${w.errors}</td><td>${w.errorRate.toFixed(1)}%</td><td><span class="badge ${w.risk}">${w.risk.toUpperCase()}</span></td></tr>`;
+            let shifts = w.shifts || 0;
+            let avg = shifts > 0 ? (w.totalCages / shifts).toFixed(1) : "0.0";
+            
+            tbody.innerHTML += `<tr><td><strong>${w.name}</strong></td><td>📦 ${w.totalCages}</td><td>${shifts}</td><td><strong>${avg}</strong></td><td style="color: ${errorColor}; font-weight: 600;">${w.errors}</td><td>${w.errorRate.toFixed(1)}%</td><td><span class="badge ${w.risk}">${w.risk.toUpperCase()}</span></td></tr>`;
         });
     }
 
@@ -559,7 +565,10 @@
 
         allTimeRanked.forEach(w => {
             let errorColor = w.allTimeErrors > 0 ? 'var(--high)' : 'inherit';
-            tbody.innerHTML += `<tr><td><strong>${w.name}</strong></td><td>📦 ${w.allTimeCages}</td><td style="color: ${errorColor}; font-weight: 600;">${w.allTimeErrors}</td><td><strong>${w.allTimeErrorRate.toFixed(1)}%</strong></td></tr>`;
+            let shiftsAll = w.allTimeShifts || 0;
+            let avgAll = shiftsAll > 0 ? (w.allTimeCages / shiftsAll).toFixed(1) : "0.0";
+
+            tbody.innerHTML += `<tr><td><strong>${w.name}</strong></td><td>📦 ${w.allTimeCages}</td><td>${shiftsAll}</td><td><strong>${avgAll}</strong></td><td style="color: ${errorColor}; font-weight: 600;">${w.allTimeErrors}</td><td><strong>${w.allTimeErrorRate.toFixed(1)}%</strong></td></tr>`;
         });
     }
 
@@ -572,7 +581,7 @@
         }
 
         historyData.forEach(record => {
-            let html = `<div class="history-card"><div class="history-header">📅 ${record.month}</div><table class="stats-table"><thead><tr><th>Zaměstnanec</th><th>Klece celkem</th><th>Chyby</th><th>Chybovost (%)</th><th>Risk na konci měsíce</th></tr></thead><tbody>`;
+           let html = `<div class="history-card"><div class="history-header">📅 ${record.month}</div><table class="stats-table"><thead><tr><th>Zaměstnanec</th><th>Klece celkem</th><th>Směny</th><th>Průměr / den</th><th>Chyby</th><th>Chybovost (%)</th><th>Risk na konci měsíce</th></tr></thead><tbody>`;
             let sortedWorkers = (record.workers || []).map(w => {
                 w.errorRate = w.totalCages > 0 ? (w.errors / w.totalCages) * 100 : 0;
                 return w;
@@ -580,11 +589,10 @@
 
             sortedWorkers.forEach(w => {
                 let errorColor = w.errors > 0 ? 'var(--high)' : 'inherit';
-                html += `<tr><td><strong>${w.name}</strong></td><td>📦 ${w.totalCages}</td><td style="color: ${errorColor}; font-weight: 600;">${w.errors}</td><td>${w.errorRate.toFixed(1)}%</td><td><span class="badge ${w.risk}">${w.risk.toUpperCase()}</span></td></tr>`;
+                let shifts = w.shifts || 0;
+                let avg = shifts > 0 ? (w.totalCages / shifts).toFixed(1) : "0.0";
+                html += `<tr><td><strong>${w.name}</strong></td><td>📦 ${w.totalCages}</td><td>${shifts}</td><td><strong>${avg}</strong></td><td style="color: ${errorColor}; font-weight: 600;">${w.errors}</td><td>${w.errorRate.toFixed(1)}%</td><td><span class="badge ${w.risk}">${w.risk.toUpperCase()}</span></td></tr>`;
             });
-            html += `</tbody></table></div>`;
-            container.innerHTML += html;
-        });
     }
 
     function renderAdminWorkers() {
