@@ -5,8 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kološ Tracker - Online iOS</title>
     
+    <!-- Firebase & Chart.js -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         :root {
@@ -21,7 +23,6 @@
         h1 { font-size: 32px; font-weight: 700; margin: 0; color: var(--text-main); }
         h2 { font-size: 24px; font-weight: 600; margin-top: 0; }
         
-        /* Language Switcher */
         .lang-switcher select { width: auto; padding: 8px 12px; border-radius: 8px; font-size: 15px; font-weight: 600; background: var(--card-bg); cursor: pointer; }
 
         .tabs { display: flex; flex-wrap: wrap; background-color: #E3E3E8; padding: 4px; border-radius: 12px; width: fit-content; margin-bottom: 10px; }
@@ -73,7 +74,8 @@
         .stats-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         .stats-table th { text-align: left; padding: 12px 16px; color: var(--text-muted); font-size: 14px; font-weight: 600; border-bottom: 2px solid var(--border); }
         .stats-table td { padding: 16px; border-bottom: 1px solid var(--border); font-size: 16px; font-weight: 500; vertical-align: middle; }
-        .stats-table tr:hover td { background-color: var(--bg-color); }
+        .stats-table tr { transition: background-color 0.2s; }
+        .stats-table tr.clickable:hover td { background-color: #E3E3E8; cursor: pointer; }
         .stats-table tr:last-child td { border-bottom: none; }
         
         .header-flex { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
@@ -95,12 +97,20 @@
         .expand-box input[type="number"] { width: 120px; padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 16px; outline: none; }
         .expand-box input[type="number"]:focus { border-color: var(--primary); }
 
-        /* RTL Стили для Иврита */
+        /* Modal Profile Styles */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); backdrop-filter: blur(4px); }
+        .modal-content { background-color: var(--card-bg); margin: 5% auto; padding: 30px; border-radius: 16px; width: 90%; max-width: 900px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); position: relative; animation: fadeIn 0.2s ease-in-out; }
+        .close-btn { position: absolute; right: 25px; top: 20px; color: var(--text-muted); font-size: 32px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .close-btn:hover { color: var(--high); }
+        .chart-container { position: relative; height: 40vh; width: 100%; margin-top: 20px; }
+
+        /* RTL */
         [dir="rtl"] .cage-item input { margin-right: 0; margin-left: 15px; }
         [dir="rtl"] .expand-box label input[type="checkbox"] { margin-right: 0; margin-left: 12px; }
         [dir="rtl"] .audit-item input[type="checkbox"] { margin-right: 0; margin-left: 10px; }
         [dir="rtl"] .stats-table th { text-align: right; }
         [dir="rtl"] .admin-row { flex-direction: row; }
+        [dir="rtl"] .close-btn { right: auto; left: 25px; }
     </style>
 </head>
 <body>
@@ -125,6 +135,7 @@
         <button id="tab-settings" onclick="switchTab('settings')" data-i18n="tab_settings">⚙️ Zaměstnanci</button>
     </div>
 
+    <!-- MAIN AUDIT SECTION -->
     <div id="sec-audit" class="section active">
         <div class="card">
             <div class="form-group">
@@ -153,6 +164,7 @@
         </div>
     </div>
     
+    <!-- STATS SECTION -->
     <div id="sec-stats" class="section">
         <div class="card">
             <div class="header-flex">
@@ -162,16 +174,12 @@
                 </div>
                 <button class="btn btn-secondary" onclick="closeMonth()" data-i18n="btn_close_month">📅 Uzavřít měsíc</button>
             </div>
+            <p style="font-size: 13px; color: var(--primary);" data-i18n="dbl_click_hint">💡 Dvojklikem na řádek otevřete graf profilu zaměstnance.</p>
             <table class="stats-table">
                 <thead>
                     <tr>
-                        <th data-i18n="th_name">Zaměstnanec</th>
-                        <th data-i18n="th_cages">Klece celkem</th>
-                        <th data-i18n="th_shifts">Směny (dny)</th>
-                        <th data-i18n="th_avg">Průměr / den</th>
-                        <th data-i18n="th_errors">Počet chyb</th>
-                        <th data-i18n="th_error_rate">Chybovost (%)</th>
-                        <th data-i18n="th_risk">Aktuální Risk</th>
+                        <th data-i18n="th_name">Zaměstnanec</th><th data-i18n="th_cages">Klece celkem</th><th data-i18n="th_shifts">Směny (dny)</th>
+                        <th data-i18n="th_avg">Průměr / den</th><th data-i18n="th_errors">Počet chyb</th><th data-i18n="th_error_rate">Chybovost (%)</th><th data-i18n="th_risk">Aktuální Risk</th>
                     </tr>
                 </thead>
                 <tbody id="stats-worker-list"></tbody>
@@ -179,6 +187,7 @@
         </div>
     </div>
 
+    <!-- DATA SECTION -->
     <div id="sec-data" class="section">
         <div class="card">
             <h2 data-i18n="data_title">Archiv a Globální data 🗂️</h2>
@@ -186,6 +195,9 @@
                 <button id="subtab-history" class="active" onclick="switchDataSubTab('history')" data-i18n="subtab_history">📅 Měsíční historie</button>
                 <button id="subtab-alltime" onclick="switchDataSubTab('alltime')" data-i18n="subtab_alltime">🌍 Celková statistika (All-time)</button>
             </div>
+            
+            <p style="font-size: 13px; color: var(--primary);" data-i18n="dbl_click_hint">💡 Dvojklikem na řádek otevřete graf profilu zaměstnance.</p>
+            
             <div id="view-history">
                 <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;" data-i18n="history_desc">Zde se ukládají statistiky po uzavření každého měsíce.</p>
                 <div id="history-container"><div id="loading-indicator" data-i18n="loading">Načítání dat z cloudu...</div></div>
@@ -195,12 +207,8 @@
                 <table class="stats-table">
                     <thead>
                         <tr>
-                            <th data-i18n="th_name">Zaměstnanec</th>
-                            <th data-i18n="th_cages_all">Klece (All-time)</th>
-                            <th data-i18n="th_shifts_all">Směny celkem</th>
-                            <th data-i18n="th_avg">Průměr / den</th>
-                            <th data-i18n="th_errors_all">Chyby (All-time)</th>
-                            <th data-i18n="th_error_rate_all">Chybovost (All-time)</th>
+                            <th data-i18n="th_name">Zaměstnanec</th><th data-i18n="th_cages_all">Klece (All-time)</th><th data-i18n="th_shifts_all">Směny celkem</th>
+                            <th data-i18n="th_avg">Průměr / den</th><th data-i18n="th_errors_all">Chyby (All-time)</th><th data-i18n="th_error_rate_all">Chybovost (All-time)</th>
                         </tr>
                     </thead>
                     <tbody id="alltime-worker-list"></tbody>
@@ -209,6 +217,7 @@
         </div>
     </div>
 
+    <!-- SETTINGS SECTION -->
     <div id="sec-settings" class="section">
         <div class="card">
             <h2 data-i18n="settings_title">Správa zaměstnanců</h2>
@@ -221,16 +230,25 @@
                 </select>
                 <button class="btn btn-secondary" style="border-radius: 12px;" onclick="addWorker()" data-i18n="btn_add_worker">Přidat do cloudu</button>
             </div>
+            <p style="font-size: 13px; color: var(--primary);" data-i18n="dbl_click_hint">💡 Dvojklikem na řádek otevřete graf profilu zaměstnance.</p>
             <table class="stats-table">
                 <thead>
-                    <tr>
-                        <th data-i18n="th_name">Zaměstnanec</th>
-                        <th data-i18n="th_risk_set">Nastavený Risk</th>
-                        <th style="text-align: right;" data-i18n="th_action">Akce</th>
-                    </tr>
+                    <tr><th data-i18n="th_name">Zaměstnanec</th><th data-i18n="th_risk_set">Nastavený Risk</th><th style="text-align: right;" data-i18n="th_action">Akce</th></tr>
                 </thead>
                 <tbody id="admin-worker-list"></tbody>
             </table>
+        </div>
+    </div>
+</div>
+
+<!-- PROFILE MODAL -->
+<div id="profile-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeProfile()">&times;</span>
+        <h2 id="profile-title" style="margin-bottom: 20px;">Profil zaměstnance</h2>
+        <button class="btn btn-secondary" id="btn-toggle-global" onclick="toggleGlobalStats()" data-i18n="btn_toggle_global" style="margin-bottom: 15px;">Zobrazit průměr skladu</button>
+        <div class="chart-container">
+            <canvas id="profileChart"></canvas>
         </div>
     </div>
 </div>
@@ -250,14 +268,16 @@
             settings_title: "Správa zaměstnanců", placeholder_name: "Jméno a příjmení", btn_add_worker: "Přidat do cloudu", th_risk_set: "Nastavený Risk", th_action: "Akce",
             alert_no_worker: "Přidej zaměstnance v nastavení!", alert_no_cage: "Vyber alespoň jednu klec!", alert_no_count: "Nenapsal jsi počet klecí u kategorie:",
             alert_saved_err: "Uloženo online! %name% udělal %err% chyb(y). Šel si pro kartáč! 🤬", alert_saved_ok: "Uloženo online! %name% je čistej (0 chyb). Dobrá práce! 🎉",
-            alert_add_ok: "Zaměstnanec přidán do cloudu!", alert_del_confirm: "Opravdu chcete smazat zaměstnance: %name%? Zmizí ze všech zařízení.", alert_month_confirm: "Opravdu chcete uzavřít měsíc?\nData budou odeslána do cloudu, rizika se přehodnotí a statistiky se vynulují na všech zařízeních!", alert_month_ok: "✅ Měsíc byl úspěšně uzavřen v cloudu!",
-            lbl_error: "Chyba", lbl_count: "Zadej počet udělaných klecí:", placeholder_count: "Např. 2", lbl_empty_db: "-- Přidejte zaměstnance v nastavení --", lbl_empty_history: "Zatím tu nic není. Uzavřete aktuální měsíc, aby se zde objevila data.",
-            stat_done: "Uděláno celkem:", stat_risk: "Úroveň rizika:", stat_test: "K otestování:"
+            alert_add_ok: "Zaměstnanec přidán do cloudu!", alert_del_confirm: "Opravdu chcete smazat zaměstnance: %name%? Zmizí ze všech zařízení.", alert_month_confirm: "Opravdu chcete uzavřít měsíc?", alert_month_ok: "✅ Měsíc byl úspěšně uzavřen v cloudu!",
+            lbl_error: "Chyba", lbl_count: "Zadej počet udělaných klecí:", placeholder_count: "Např. 2", lbl_empty_db: "-- Přidejte zaměstnance v nastavení --", lbl_empty_history: "Zatím tu nic není.",
+            stat_done: "Uděláno celkem:", stat_risk: "Úroveň rizika:", stat_test: "K otestování:", dbl_click_hint: "💡 Dvojklikem na řádek otevřete graf profilu.",
+            profile_title: "Profil: %name%", btn_toggle_global: "Zobrazit průměr skladu", current_month: "Aktuální",
+            chart_avg_cages: "Průměr klecí (Zaměstnanec)", chart_err_rate: "Chybovost (Zaměstnanec) %", chart_global_avg: "Průměr klecí (Sklad)", chart_global_err: "Chybovost (Sklad) %"
         },
         en: {
             tab_audit: "📝 Cage Audit", tab_stats: "📊 Statistics (Month)", tab_data: "📂 Data (History & All-time)", tab_settings: "⚙️ Employees",
             select_worker: "Select employee:", done_cages: "Completed cages today:", btn_generate: "Generate Sample 🎲",
-            cages_to_test: "🔍 Cages to test (Inventory):", click_error: "Check the box if you find an error in the cage:", btn_save_audit: "💾 Save Audit Result",
+            cages_to_test: "🔍 Cages to test (Inventory):", click_error: "Check the box if you find an error:", btn_save_audit: "💾 Save Audit Result",
             stats_title: "Employee Statistics (Current Month) 🏆", stats_formula: "Error Rate = (Errors / Total Cages) × 100", btn_close_month: "📅 Close Month",
             th_name: "Employee", th_cages: "Total Cages", th_shifts: "Shifts (days)", th_avg: "Avg / day", th_errors: "Errors", th_error_rate: "Error Rate (%)", th_risk: "Current Risk",
             data_title: "Archive & Global Data 🗂️", subtab_history: "📅 Monthly History", subtab_alltime: "🌍 Overall Stats (All-time)",
@@ -265,26 +285,30 @@
             alltime_desc: "Sum of all cages and errors for the entire working period.", th_cages_all: "Cages (All-time)", th_shifts_all: "Total Shifts", th_errors_all: "Errors (All-time)", th_error_rate_all: "Error Rate (All-time)",
             settings_title: "Employee Management", placeholder_name: "Full Name", btn_add_worker: "Add to Cloud", th_risk_set: "Set Risk", th_action: "Action",
             alert_no_worker: "Add an employee in settings!", alert_no_cage: "Select at least one cage!", alert_no_count: "You didn't enter the number of cages for:",
-            alert_saved_err: "Saved online! %name% made %err% error(s). Time for a talk! 🤬", alert_saved_ok: "Saved online! %name% is clean (0 errors). Good job! 🎉",
-            alert_add_ok: "Employee added to cloud!", alert_del_confirm: "Are you sure you want to delete: %name%? They will be removed everywhere.", alert_month_confirm: "Close the month?\nData will be saved to history, risks updated, and stats reset across all devices!", alert_month_ok: "✅ Month successfully closed in the cloud!",
-            lbl_error: "Error", lbl_count: "Enter number of completed cages:", placeholder_count: "E.g. 2", lbl_empty_db: "-- Add employees in settings --", lbl_empty_history: "Nothing here yet. Close the current month to see data.",
-            stat_done: "Total done:", stat_risk: "Risk Level:", stat_test: "To test:"
+            alert_saved_err: "Saved online! %name% made %err% error(s).", alert_saved_ok: "Saved online! %name% is clean (0 errors).",
+            alert_add_ok: "Employee added to cloud!", alert_del_confirm: "Are you sure you want to delete: %name%?", alert_month_confirm: "Close the month?", alert_month_ok: "✅ Month successfully closed in the cloud!",
+            lbl_error: "Error", lbl_count: "Enter number of completed cages:", placeholder_count: "E.g. 2", lbl_empty_db: "-- Add employees in settings --", lbl_empty_history: "Nothing here yet.",
+            stat_done: "Total done:", stat_risk: "Risk Level:", stat_test: "To test:", dbl_click_hint: "💡 Double-click a row to open the profile chart.",
+            profile_title: "Profile: %name%", btn_toggle_global: "Toggle Warehouse Average", current_month: "Current",
+            chart_avg_cages: "Avg Cages (Employee)", chart_err_rate: "Error Rate (Employee) %", chart_global_avg: "Avg Cages (Warehouse)", chart_global_err: "Error Rate (Warehouse) %"
         },
         ru: {
             tab_audit: "📝 Аудит Клетей", tab_stats: "📊 Статистика (Месяц)", tab_data: "📂 Данные (История и All-time)", tab_settings: "⚙️ Сотрудники",
             select_worker: "Выберите сотрудника:", done_cages: "Готовые клети за сегодня:", btn_generate: "Сгенерировать Сэмпл 🎲",
-            cages_to_test: "🔍 Клети на проверку (Инвентура):", click_error: "Отметьте галочкой, если нашли ошибку в клети:", btn_save_audit: "💾 Сохранить результат",
+            cages_to_test: "🔍 Клети на проверку (Инвентура):", click_error: "Отметьте галочкой, если нашли ошибку:", btn_save_audit: "💾 Сохранить результат",
             stats_title: "Статистика сотрудников (Текущий месяц) 🏆", stats_formula: "Процент брака = (Ошибки / Всего клетей) × 100", btn_close_month: "📅 Закрыть месяц",
             th_name: "Сотрудник", th_cages: "Всего клетей", th_shifts: "Смены (дни)", th_avg: "В ср. за день", th_errors: "Ошибок", th_error_rate: "Брак (%)", th_risk: "Текущий Риск",
             data_title: "Архив и Глобальные данные 🗂️", subtab_history: "📅 История по месяцам", subtab_alltime: "🌍 Общая статистика (All-time)",
-            history_desc: "Здесь сохраняется статистика после закрытия каждого месяца.", loading: "Загрузка данных из облака...",
-            alltime_desc: "Сумма всех клетей и ошибок за всё время работы сотрудника.", th_cages_all: "Клети (All-time)", th_shifts_all: "Всего смен", th_errors_all: "Ошибки (All-time)", th_error_rate_all: "Брак (All-time)",
+            history_desc: "Здесь сохраняется статистика после закрытия месяца.", loading: "Загрузка данных из облака...",
+            alltime_desc: "Сумма всех клетей и ошибок за всё время работы.", th_cages_all: "Клети (All-time)", th_shifts_all: "Всего смен", th_errors_all: "Ошибки (All-time)", th_error_rate_all: "Брак (All-time)",
             settings_title: "Управление сотрудниками", placeholder_name: "Имя и Фамилия", btn_add_worker: "Добавить в облако", th_risk_set: "Установленный Риск", th_action: "Действие",
-            alert_no_worker: "Добавьте сотрудника в настройках!", alert_no_cage: "Выберите хотя бы одну клеть!", alert_no_count: "Вы не указали количество клетей для категории:",
-            alert_saved_err: "Сохранено онлайн! %name% сделал(а) %err% ошибку(и). Пора на ковер! 🤬", alert_saved_ok: "Сохранено онлайн! %name% чист (0 ошибок). Отличная работа! 🎉",
-            alert_add_ok: "Сотрудник добавлен в облако!", alert_del_confirm: "Точно удалить сотрудника: %name%? Он исчезнет на всех устройствах.", alert_month_confirm: "Точно закрыть месяц?\nДанные уйдут в архив, риски пересчитаются, а статистика обнулится у всех!", alert_month_ok: "✅ Месяц успешно закрыт в облаке!",
-            lbl_error: "Ошибка", lbl_count: "Укажите количество клетей:", placeholder_count: "Напр. 2", lbl_empty_db: "-- Добавьте сотрудников в настройках --", lbl_empty_history: "Здесь пока пусто. Закройте текущий месяц, чтобы появились данные.",
-            stat_done: "Всего сделано:", stat_risk: "Уровень риска:", stat_test: "На проверку:"
+            alert_no_worker: "Добавьте сотрудника в настройках!", alert_no_cage: "Выберите хотя бы одну клеть!", alert_no_count: "Укажите количество клетей для категории:",
+            alert_saved_err: "Сохранено онлайн! %name% сделал(а) %err% ошибку(и).", alert_saved_ok: "Сохранено онлайн! %name% чист (0 ошибок).",
+            alert_add_ok: "Сотрудник добавлен в облако!", alert_del_confirm: "Точно удалить сотрудника: %name%?", alert_month_confirm: "Точно закрыть месяц?", alert_month_ok: "✅ Месяц успешно закрыт в облаке!",
+            lbl_error: "Ошибка", lbl_count: "Укажите количество клетей:", placeholder_count: "Напр. 2", lbl_empty_db: "-- Добавьте сотрудников в настройках --", lbl_empty_history: "Здесь пока пусто.",
+            stat_done: "Сделано:", stat_risk: "Уровень риска:", stat_test: "На проверку:", dbl_click_hint: "💡 Двойной клик по строке откроет график профиля.",
+            profile_title: "Профиль: %name%", btn_toggle_global: "Показать среднее по складу", current_month: "Текущий",
+            chart_avg_cages: "В ср. клетей (Сотрудник)", chart_err_rate: "Брак (Сотрудник) %", chart_global_avg: "В ср. клетей (Склад)", chart_global_err: "Брак (Склад) %"
         },
         he: {
             tab_audit: "📝 ביקורת כלובים", tab_stats: "📊 סטטיסטיקה (חודש)", tab_data: "📂 נתונים (היסטוריה וכל הזמנים)", tab_settings: "⚙️ עובדים",
@@ -297,14 +321,15 @@
             alltime_desc: "סיכום של כל הכלובים והשגיאות לכל תקופת העבודה.", th_cages_all: "כלובים (כל הזמנים)", th_shifts_all: "סך משמרות", th_errors_all: "שגיאות (כל הזמנים)", th_error_rate_all: "אחוז שגיאות (כל הזמנים)",
             settings_title: "ניהול עובדים", placeholder_name: "שם ושם משפחה", btn_add_worker: "הוסף לענן", th_risk_set: "סיכון מוגדר", th_action: "פעולה",
             alert_no_worker: "הוסף עובד בהגדרות!", alert_no_cage: "בחר לפחות כלוב אחד!", alert_no_count: "לא הזנת מספר כלובים עבור הקטגוריה:",
-            alert_saved_err: "נשמר בענן! %name% עשה %err% שגיאות. זמן לשיחה! 🤬", alert_saved_ok: "נשמר בענן! %name% נקי (0 שגיאות). עבודה טובה! 🎉",
-            alert_add_ok: "עובד נוסף לענן!", alert_del_confirm: "האם אתה בטוח שברצונך למחוק את: %name%? הוא יימחק מכל המכשירים.", alert_month_confirm: "לסגור את החודש?\nהנתונים יישמרו לארכיון, הסיכונים יתעדכנו והסטטיסטיקה תתאפס בכל המכשירים!", alert_month_ok: "✅ החודש נסגר בהצלחה בענן!",
-            lbl_error: "שגיאה", lbl_count: "הזן את מספר הכלובים שהושלמו:", placeholder_count: "לדוגמה 2", lbl_empty_db: "-- הוסף עובדים בהגדרות --", lbl_empty_history: "אין פה כלום עדיין. סגור את החודש הנוכחי כדי לראות נתונים.",
-            stat_done: "סך הכל הושלם:", stat_risk: "רמת סיכון:", stat_test: "לבדיקה:"
+            alert_saved_err: "נשמר בענן! %name% עשה %err% שגיאות.", alert_saved_ok: "נשמר בענן! %name% נקי (0 שגיאות).",
+            alert_add_ok: "עובד נוסף לענן!", alert_del_confirm: "האם אתה בטוח שברצונך למחוק את: %name%?", alert_month_confirm: "לסגור את החודש?", alert_month_ok: "✅ החודש נסגר בהצלחה בענן!",
+            lbl_error: "שגיאה", lbl_count: "הזן את מספר הכלובים:", placeholder_count: "לדוגמה 2", lbl_empty_db: "-- הוסף עובדים בהגדרות --", lbl_empty_history: "אין פה כלום עדיין.",
+            stat_done: "סך הכל:", stat_risk: "רמת סיכון:", stat_test: "לבדיקה:", dbl_click_hint: "💡 לחץ פעמיים על שורה כדי לפתוח את פרופיל העובד.",
+            profile_title: "פרופיל: %name%", btn_toggle_global: "הצג ממוצע מחסן", current_month: "נוכחי",
+            chart_avg_cages: "ממוצע כלובים (עובד)", chart_err_rate: "אחוז שגיאות (עובד)", chart_global_avg: "ממוצע כלובים (מחסן)", chart_global_err: "אחוז שגיאות (מחסן)"
         }
     };
 
-    // --- КАТЕГОРИИ КЛЕЦЕЙ С ПЕРЕВОДАМИ ---
     const cageCategories = [
         { id: "vyziva", type: "standard", names: { cs: "Dětská výživa", en: "Baby food", ru: "Детское питание", he: "מזון לתינוקות" } },
         { id: "slehacky", type: "standard", names: { cs: "Šlehačky a ledové kávy", en: "Whipped creams & Iced coffees", ru: "Сливки и айс-кофе", he: "קצפות וקפה קר" } },
@@ -333,28 +358,16 @@
 
     let currentLang = localStorage.getItem('kolos_lang') || 'cs';
     document.getElementById('lang-select').value = currentLang;
-
     function t(key) { return dict[currentLang][key] || key; }
 
     function changeLanguage(lang) {
-        currentLang = lang;
-        localStorage.setItem('kolos_lang', lang);
-        document.documentElement.lang = lang;
-        document.documentElement.dir = lang === 'he' ? 'rtl' : 'ltr';
-        
-        // Перевод статического HTML
+        currentLang = lang; localStorage.setItem('kolos_lang', lang);
+        document.documentElement.lang = lang; document.documentElement.dir = lang === 'he' ? 'rtl' : 'ltr';
         document.querySelectorAll('[data-i18n]').forEach(el => { el.innerText = t(el.getAttribute('data-i18n')); });
         document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = t(el.getAttribute('data-i18n-placeholder')); });
-        
-        // Перерисовка динамических блоков
-        renderWorkerSelect();
-        renderCages();
-        renderStats();
-        renderAllTimeStats();
-        renderHistory();
+        renderWorkerSelect(); renderCages(); renderStats(); renderAllTimeStats(); renderHistory();
     }
 
-    // 1. ИНИЦИАЛИЗАЦИЯ FIREBASE
     const firebaseConfig = {
         apiKey: "AIzaSyCMjmQV5fKHVk_QUVMXi8uURNJC2uiWhsE",
         authDomain: "kolos-tracker.firebaseapp.com",
@@ -368,12 +381,10 @@
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-
-    // 2. ЛОКАЛЬНЫЕ ПЕРЕМЕННЫЕ
     let workers = []; let historyData = []; let currentAuditCagesCount = 0; 
+    let profileChartInstance = null; let isGlobalStatsVisible = false; let currentProfileWorkerId = null;
     const riskRates = { 'low': 0.10, 'medium': 0.30, 'high': 0.50 };
 
-    // 3. ПОДКЛЮЧЕНИЕ К БАЗЕ
     db.ref('workers').on('value', (snapshot) => {
         const data = snapshot.val(); workers = [];
         if (data) { for (let key in data) workers.push({ id: key, ...data[key] }); }
@@ -387,7 +398,6 @@
         renderHistory();
     });
 
-    // 4. ФУНКЦИИ ИНТЕРФЕЙСА
     function init() { changeLanguage(currentLang); }
 
     function switchTab(tab) {
@@ -405,8 +415,7 @@
     }
 
     function renderWorkerSelect() {
-        const select = document.getElementById('worker-select');
-        let currentValue = select.value; select.innerHTML = '';
+        const select = document.getElementById('worker-select'); let currentValue = select.value; select.innerHTML = '';
         if (workers.length === 0) { select.innerHTML = `<option value="">${t('lbl_empty_db')}</option>`; select.disabled = true; return; }
         select.disabled = false;
         workers.forEach(w => { select.innerHTML += `<option value="${w.id}">${w.name}</option>`; });
@@ -414,8 +423,7 @@
     }
 
     function updateWorkerRisk() {
-        const select = document.getElementById('worker-select');
-        const display = document.getElementById('worker-risk-display');
+        const select = document.getElementById('worker-select'); const display = document.getElementById('worker-risk-display');
         document.getElementById('result-box').style.display = 'none'; 
         if(workers.length === 0 || select.value === "") { display.innerHTML = ``; return; }
         const worker = workers.find(w => w.id === select.value); if(!worker) return;
@@ -430,8 +438,7 @@
             if (cat.type === 'standard') {
                 grid.innerHTML += `<div class="cage-wrapper"><label class="cage-item"><input type="checkbox" value="${cat.id}" class="cage-checkbox standard-cage">${catName}</label></div>`;
             } else if (cat.type === 'sub') {
-                let subsArray = cat.subs[currentLang];
-                let origSubsArray = cat.subs['cs']; // Для БД используем CS как ID
+                let subsArray = cat.subs[currentLang]; let origSubsArray = cat.subs['cs'];
                 let subsHtml = subsArray.map((sub, idx) => `<label><input type="checkbox" value="${origSubsArray[idx]}" data-parent="${cat.id}" class="cage-checkbox sub-cage"> ${sub}</label>`).join('');
                 grid.innerHTML += `<div class="cage-wrapper"><label class="cage-item" style="margin-bottom:0;"><input type="checkbox" onchange="document.getElementById('exp_${cat.id}').style.display = this.checked ? 'block' : 'none'">${catName} ▾</label><div id="exp_${cat.id}" class="expand-box">${subsHtml}</div></div>`;
             } else if (cat.type === 'number') {
@@ -440,24 +447,17 @@
         });
     }
 
-    // Вспомогательная функция для перевода ID клеци обратно в читаемый текст нужного языка
-    function getCageNameById(id) {
-        let cat = cageCategories.find(c => c.id === id);
-        return cat ? cat.names[currentLang] : id;
-    }
+    function getCageNameById(id) { let cat = cageCategories.find(c => c.id === id); return cat ? cat.names[currentLang] : id; }
 
     function generateSample() {
         const select = document.getElementById('worker-select');
         if(workers.length === 0 || select.value === "") return alert(t('alert_no_worker'));
-        
         const worker = workers.find(w => w.id === select.value);
         let doneCages = []; let errorMsg = null;
-
         document.querySelectorAll('.standard-cage:checked').forEach(cb => doneCages.push({ id: cb.value, display: getCageNameById(cb.value) }));
         document.querySelectorAll('.sub-cage:checked').forEach(cb => {
             let parentCat = cageCategories.find(c => c.id === cb.getAttribute('data-parent'));
-            let subIndex = parentCat.subs['cs'].indexOf(cb.value);
-            let displaySub = parentCat.subs[currentLang][subIndex];
+            let subIndex = parentCat.subs['cs'].indexOf(cb.value); let displaySub = parentCat.subs[currentLang][subIndex];
             doneCages.push({ id: cb.getAttribute('data-parent') + " - " + cb.value, display: parentCat.names[currentLang] + " - " + displaySub });
         });
         document.querySelectorAll('.cage-number').forEach(input => {
@@ -468,39 +468,28 @@
             }
         });
 
-        if (errorMsg) return alert(errorMsg);
-        if (doneCages.length === 0) return alert(t('alert_no_cage'));
-        
+        if (errorMsg) return alert(errorMsg); if (doneCages.length === 0) return alert(t('alert_no_cage'));
         currentAuditCagesCount = doneCages.length; 
-        const rate = riskRates[worker.risk];
-        let sampleSize = Math.ceil(doneCages.length * rate);
-        const shuffled = doneCages.sort(() => 0.5 - Math.random());
-        const selectedSample = shuffled.slice(0, sampleSize);
+        const rate = riskRates[worker.risk]; let sampleSize = Math.ceil(doneCages.length * rate);
+        const shuffled = doneCages.sort(() => 0.5 - Math.random()); const selectedSample = shuffled.slice(0, sampleSize);
 
-        const resBox = document.getElementById('result-box'); const list = document.getElementById('sample-list');
-        list.innerHTML = '';
-        selectedSample.forEach(item => {
-            list.innerHTML += `<li class="audit-item"><span>📍 ${item.display}</span><label><input type="checkbox" class="error-checkbox"> ${t('lbl_error')}</label></li>`;
-        });
+        const resBox = document.getElementById('result-box'); const list = document.getElementById('sample-list'); list.innerHTML = '';
+        selectedSample.forEach(item => { list.innerHTML += `<li class="audit-item"><span>📍 ${item.display}</span><label><input type="checkbox" class="error-checkbox"> ${t('lbl_error')}</label></li>`; });
         document.getElementById('sample-stats').innerHTML = `${t('stat_done')} <strong>${doneCages.length}</strong> | ${t('stat_risk')} <strong>${worker.risk.toUpperCase()}</strong> | ${t('stat_test')} <strong>${sampleSize}</strong>`;
         resBox.style.display = 'block'; resBox.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
     
-    // 5. FIREBASE DB
     function finishAudit() {
         const select = document.getElementById('worker-select'); const workerId = select.value;
         const worker = workers.find(w => w.id === workerId);
         const errorsCount = document.querySelectorAll('.error-checkbox:checked').length;
-        
         db.ref('workers/' + workerId).update({
             totalCages: (worker.totalCages || 0) + currentAuditCagesCount, errors: (worker.errors || 0) + errorsCount,
             allTimeCages: (worker.allTimeCages || 0) + currentAuditCagesCount, allTimeErrors: (worker.allTimeErrors || 0) + errorsCount,
             shifts: (worker.shifts || 0) + 1, allTimeShifts: (worker.allTimeShifts || 0) + 1
         });
-        
         document.querySelectorAll('.cage-wrapper input[type="checkbox"]').forEach(cb => { cb.checked = false; cb.dispatchEvent(new Event('change')); });
         document.getElementById('result-box').style.display = 'none';
-        
         if (errorsCount > 0) alert(t('alert_saved_err').replace('%name%', worker.name).replace('%err%', errorsCount));
         else alert(t('alert_saved_ok').replace('%name%', worker.name));
         currentAuditCagesCount = 0;
@@ -508,42 +497,136 @@
 
     function addWorker() {
         const nameInput = document.getElementById('new-worker-name'); const name = nameInput.value.trim();
-        const risk = document.getElementById('new-worker-risk').value;
-        if (!name) return alert('Name!');
+        const risk = document.getElementById('new-worker-risk').value; if (!name) return alert('Name!');
         db.ref('workers').push({ name: name, risk: risk, totalCages: 0, errors: 0, allTimeCages: 0, allTimeErrors: 0, shifts: 0, allTimeShifts: 0 });
         nameInput.value = ''; alert(t('alert_add_ok'));
     }
 
-    function removeWorker(id, name) {
-        if (confirm(t('alert_del_confirm').replace('%name%', name))) db.ref('workers/' + id).remove();
-    }
+    function removeWorker(id, name) { if (confirm(t('alert_del_confirm').replace('%name%', name))) db.ref('workers/' + id).remove(); }
 
     function closeMonth() {
         if (!confirm(t('alert_month_confirm'))) return;
         const dateNow = new Date(); const monthName = dateNow.toLocaleDateString('cs-CZ', { month: 'long', year: 'numeric' });
-        const snapshotWorkers = workers.map(w => { return { name: w.name, risk: w.risk, totalCages: w.totalCages, errors: w.errors, shifts: w.shifts || 0 }; });
+        // Добавлен id, чтобы находить сотрудника на графике!
+        const snapshotWorkers = workers.map(w => { return { id: w.id, name: w.name, risk: w.risk, totalCages: w.totalCages, errors: w.errors, shifts: w.shifts || 0 }; });
         db.ref('history').push({ month: monthName, timestamp: dateNow.getTime(), workers: snapshotWorkers });
 
         const updates = {};
         workers.forEach(w => {
             let newRisk = w.risk;
-            if (w.totalCages > 0) {
-                let errorRate = (w.errors / w.totalCages) * 100;
-                if (errorRate < 5) newRisk = 'low'; else if (errorRate <= 15) newRisk = 'medium'; else newRisk = 'high';
-            }
+            if (w.totalCages > 0) { let errorRate = (w.errors / w.totalCages) * 100; if (errorRate < 5) newRisk = 'low'; else if (errorRate <= 15) newRisk = 'medium'; else newRisk = 'high'; }
             updates['workers/' + w.id + '/totalCages'] = 0; updates['workers/' + w.id + '/errors'] = 0;
             updates['workers/' + w.id + '/shifts'] = 0; updates['workers/' + w.id + '/risk'] = newRisk;
         });
         db.ref().update(updates); alert(t('alert_month_ok'));
     }
 
-    // 6. TABLES
+    // --- CHART & PROFILE LOGIC ---
+    function openProfile(workerId) {
+        currentProfileWorkerId = workerId;
+        const modal = document.getElementById('profile-modal');
+        let workerName = "Neznámý";
+        
+        let labels = []; let wCages = []; let wErrors = []; let gCages = []; let gErrors = [];
+        
+        // 1. Проходимся по истории (нужно перевернуть, чтобы было хронологически: от старых к новым)
+        let chronHistory = [...historyData].reverse();
+        
+        chronHistory.forEach(record => {
+            labels.push(record.month);
+            let sumCages = 0; let sumShifts = 0; let sumErrors = 0;
+            
+            record.workers.forEach(x => {
+                sumCages += (x.totalCages || 0); sumShifts += (x.shifts || 0); sumErrors += (x.errors || 0);
+            });
+            // Находим нужного чела. Если старая запись без ID, ищем по имени.
+            let w = record.workers.find(x => x.id === workerId) || record.workers.find(x => x.name === workers.find(w=>w.id===workerId)?.name);
+            if(w && workerName === "Neznámý") workerName = w.name;
+            
+            if(w) {
+                wCages.push(w.shifts > 0 ? (w.totalCages / w.shifts) : 0);
+                wErrors.push(w.totalCages > 0 ? (w.errors / w.totalCages * 100) : 0);
+            } else {
+                wCages.push(0); wErrors.push(0);
+            }
+            gCages.push(sumShifts > 0 ? (sumCages / sumShifts) : 0);
+            gErrors.push(sumCages > 0 ? (sumErrors / sumCages * 100) : 0);
+        });
+
+        // 2. Добавляем текущий месяц
+        labels.push(t('current_month'));
+        let sumCagesCurr = 0; let sumShiftsCurr = 0; let sumErrorsCurr = 0;
+        workers.forEach(x => { sumCagesCurr += (x.totalCages || 0); sumShiftsCurr += (x.shifts || 0); sumErrorsCurr += (x.errors || 0); });
+        
+        let currW = workers.find(x => x.id === workerId);
+        if(currW) {
+            workerName = currW.name;
+            wCages.push(currW.shifts > 0 ? (currW.totalCages / currW.shifts) : 0);
+            wErrors.push(currW.totalCages > 0 ? (currW.errors / currW.totalCages * 100) : 0);
+        } else {
+            wCages.push(0); wErrors.push(0);
+        }
+        gCages.push(sumShiftsCurr > 0 ? (sumCagesCurr / sumShiftsCurr) : 0);
+        gErrors.push(sumCagesCurr > 0 ? (sumErrorsCurr / sumCagesCurr * 100) : 0);
+
+        document.getElementById('profile-title').innerText = t('profile_title').replace('%name%', workerName);
+        isGlobalStatsVisible = false; // По умолчанию складские линии скрыты
+        
+        drawChart(labels, wCages, wErrors, gCages, gErrors);
+        modal.style.display = "block";
+    }
+
+    function closeProfile() { document.getElementById('profile-modal').style.display = "none"; }
+
+    function drawChart(labels, wCages, wErrors, gCages, gErrors) {
+        if (profileChartInstance) profileChartInstance.destroy();
+        const ctx = document.getElementById('profileChart').getContext('2d');
+        
+        profileChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    { label: t('chart_avg_cages'), data: wCages, borderColor: '#34C759', backgroundColor: 'rgba(52,199,89,0.1)', yAxisID: 'y1', tension: 0.3, fill: true, borderWidth: 3 },
+                    { label: t('chart_err_rate'), data: wErrors, borderColor: '#FF3B30', backgroundColor: 'transparent', yAxisID: 'y2', tension: 0.3, borderWidth: 3 },
+                    { label: t('chart_global_avg'), data: gCages, borderColor: '#007AFF', borderDash: [5, 5], backgroundColor: 'transparent', yAxisID: 'y1', tension: 0.3, hidden: !isGlobalStatsVisible },
+                    { label: t('chart_global_err'), data: gErrors, borderColor: '#FF9500', borderDash: [5, 5], backgroundColor: 'transparent', yAxisID: 'y2', tension: 0.3, hidden: !isGlobalStatsVisible }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: { legend: { position: 'top' } },
+                scales: {
+                    x: { grid: { display: false } },
+                    y1: { type: 'linear', display: true, position: 'left', title: { display: true, text: 'Klece / Den' }, min: 0 },
+                    y2: { type: 'linear', display: true, position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'Chyby (%)' }, min: 0 }
+                }
+            }
+        });
+    }
+
+    function toggleGlobalStats() {
+        if(!profileChartInstance) return;
+        isGlobalStatsVisible = !isGlobalStatsVisible;
+        profileChartInstance.data.datasets[2].hidden = !isGlobalStatsVisible;
+        profileChartInstance.data.datasets[3].hidden = !isGlobalStatsVisible;
+        profileChartInstance.update();
+    }
+
+    // Закрытие модального окна по клику вне его
+    window.onclick = function(event) {
+        let modal = document.getElementById('profile-modal');
+        if (event.target == modal) closeProfile();
+    }
+
+    // 6. TABLES (Added double click)
     function renderStats() {
         const tbody = document.getElementById('stats-worker-list'); tbody.innerHTML = '';
         let rankedWorkers = workers.map(w => { return { ...w, errorRate: w.totalCages > 0 ? (w.errors / w.totalCages) * 100 : 0 }; }).sort((a, b) => a.errorRate - b.errorRate);
         rankedWorkers.forEach(w => {
             let errorColor = w.errors > 0 ? 'var(--high)' : 'inherit'; let shifts = w.shifts || 0; let avg = shifts > 0 ? (w.totalCages / shifts).toFixed(1) : "0.0";
-            tbody.innerHTML += `<tr><td><strong>${w.name}</strong></td><td>📦 ${w.totalCages || 0}</td><td>${shifts}</td><td><strong>${avg}</strong></td><td style="color: ${errorColor}; font-weight: 600;">${w.errors || 0}</td><td>${w.errorRate.toFixed(1)}%</td><td><span class="badge ${w.risk}">${w.risk.toUpperCase()}</span></td></tr>`;
+            tbody.innerHTML += `<tr class="clickable" ondblclick="openProfile('${w.id}')"><td><strong>${w.name}</strong></td><td>📦 ${w.totalCages || 0}</td><td>${shifts}</td><td><strong>${avg}</strong></td><td style="color: ${errorColor}; font-weight: 600;">${w.errors || 0}</td><td>${w.errorRate.toFixed(1)}%</td><td><span class="badge ${w.risk}">${w.risk.toUpperCase()}</span></td></tr>`;
         });
     }
 
@@ -552,7 +635,7 @@
         let allTimeRanked = workers.map(w => { return { ...w, allTimeErrorRate: w.allTimeCages > 0 ? (w.allTimeErrors / w.allTimeCages) * 100 : 0 }; }).sort((a, b) => a.allTimeErrorRate - b.allTimeErrorRate); 
         allTimeRanked.forEach(w => {
             let errorColor = w.allTimeErrors > 0 ? 'var(--high)' : 'inherit'; let shiftsAll = w.allTimeShifts || 0; let avgAll = shiftsAll > 0 ? (w.allTimeCages / shiftsAll).toFixed(1) : "0.0";
-            tbody.innerHTML += `<tr><td><strong>${w.name}</strong></td><td>📦 ${w.allTimeCages || 0}</td><td>${shiftsAll}</td><td><strong>${avgAll}</strong></td><td style="color: ${errorColor}; font-weight: 600;">${w.allTimeErrors || 0}</td><td><strong>${w.allTimeErrorRate.toFixed(1)}%</strong></td></tr>`;
+            tbody.innerHTML += `<tr class="clickable" ondblclick="openProfile('${w.id}')"><td><strong>${w.name}</strong></td><td>📦 ${w.allTimeCages || 0}</td><td>${shiftsAll}</td><td><strong>${avgAll}</strong></td><td style="color: ${errorColor}; font-weight: 600;">${w.allTimeErrors || 0}</td><td><strong>${w.allTimeErrorRate.toFixed(1)}%</strong></td></tr>`;
         });
     }
 
@@ -564,7 +647,7 @@
             let sortedWorkers = (record.workers || []).map(w => { w.errorRate = w.totalCages > 0 ? (w.errors / w.totalCages) * 100 : 0; return w; }).sort((a, b) => a.errorRate - b.errorRate);
             sortedWorkers.forEach(w => {
                 let errorColor = w.errors > 0 ? 'var(--high)' : 'inherit'; let shifts = w.shifts || 0; let avg = shifts > 0 ? (w.totalCages / shifts).toFixed(1) : "0.0";
-                html += `<tr><td><strong>${w.name}</strong></td><td>📦 ${w.totalCages || 0}</td><td>${shifts}</td><td><strong>${avg}</strong></td><td style="color: ${errorColor}; font-weight: 600;">${w.errors || 0}</td><td>${w.errorRate.toFixed(1)}%</td><td><span class="badge ${w.risk}">${w.risk.toUpperCase()}</span></td></tr>`;
+                html += `<tr class="clickable" ondblclick="openProfile('${w.id}')"><td><strong>${w.name}</strong></td><td>📦 ${w.totalCages || 0}</td><td>${shifts}</td><td><strong>${avg}</strong></td><td style="color: ${errorColor}; font-weight: 600;">${w.errors || 0}</td><td>${w.errorRate.toFixed(1)}%</td><td><span class="badge ${w.risk}">${w.risk.toUpperCase()}</span></td></tr>`;
             });
             html += `</tbody></table></div>`; container.innerHTML += html;
         });
@@ -573,7 +656,7 @@
     function renderAdminWorkers() {
         const tbody = document.getElementById('admin-worker-list'); tbody.innerHTML = '';
         workers.forEach(w => {
-            tbody.innerHTML += `<tr><td><strong>${w.name}</strong></td><td><span class="badge ${w.risk}">${w.risk.toUpperCase()}</span></td><td style="text-align: right;"><button class="btn-delete" onclick="removeWorker('${w.id}', '${w.name}')" title="Smazat">🗑️</button></td></tr>`;
+            tbody.innerHTML += `<tr class="clickable" ondblclick="openProfile('${w.id}')"><td><strong>${w.name}</strong></td><td><span class="badge ${w.risk}">${w.risk.toUpperCase()}</span></td><td style="text-align: right;"><button class="btn-delete" onclick="removeWorker('${w.id}', '${w.name}')" title="Smazat">🗑️</button></td></tr>`;
         });
     }
 
