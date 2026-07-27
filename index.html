@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kološ Tracker - PRO</title>
+    <title>Kološ Tracker - Enterprise</title>
     
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
@@ -19,25 +19,28 @@
         .container { width: 100%; max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
         
         .header-top { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; }
-        h1 { font-size: 32px; font-weight: 700; margin: 0; color: var(--text-main); }
-        h2 { font-size: 24px; font-weight: 600; margin-top: 0; }
+        .header-top h1 { font-size: 28px; font-weight: 700; margin: 0; color: var(--text-main); display: flex; align-items: center; gap: 10px;}
+        h2 { font-size: 20px; font-weight: 600; margin-top: 0; display: flex; align-items: center; gap: 8px;}
         
+        /* SVG Icons */
+        .svg-icon { width: 20px; height: 20px; fill: currentColor; flex-shrink: 0; }
+        .flag-icon { width: 22px; height: 15px; border-radius: 2px; object-fit: cover; border: 1px solid rgba(0,0,0,0.1); }
+
         /* Custom Language Switcher */
-        .custom-lang-switcher { position: relative; display: inline-block; width: 150px; font-size: 15px; font-weight: 600; }
-        .custom-lang-switcher .select-selected { background-color: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; }
+        .custom-lang-switcher { position: relative; display: inline-block; width: 160px; font-size: 15px; font-weight: 600; }
+        .custom-lang-switcher .select-selected { background-color: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
         .custom-lang-switcher .select-items { display: none; position: absolute; background-color: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; top: 110%; left: 0; right: 0; z-index: 99; box-shadow: 0 4px 15px rgba(0,0,0,0.1); overflow: hidden; }
-        .custom-lang-switcher .select-items div { padding: 8px 12px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        .custom-lang-switcher .select-items div { padding: 10px 12px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
         .custom-lang-switcher .select-items div:hover { background-color: var(--bg-color); }
         .custom-lang-switcher .select-show { display: block; }
-        .flag-icon { width: 18px; height: 12px; border-radius: 2px; object-fit: cover; border: 1px solid rgba(0,0,0,0.1); }
 
         /* Screens */
         .screen { display: none; animation: fadeIn 0.3s ease-in-out; }
         .screen.active-screen { display: block; }
-        .role-btn { width: 100%; padding: 25px; font-size: 22px; margin-bottom: 20px; border-radius: 16px; }
+        .role-btn { width: 100%; padding: 20px; font-size: 18px; margin-bottom: 15px; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 10px;}
         
         .tabs { display: flex; flex-wrap: wrap; background-color: #E3E3E8; padding: 4px; border-radius: 12px; width: fit-content; margin-bottom: 10px; }
-        .tabs button { padding: 10px 24px; background: transparent; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; color: var(--text-muted); cursor: pointer; transition: all 0.2s ease; }
+        .tabs button { display: flex; align-items: center; gap: 6px; padding: 10px 20px; background: transparent; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; color: var(--text-muted); cursor: pointer; transition: all 0.2s ease; }
         .tabs button.active { background: var(--card-bg); color: var(--text-main); box-shadow: 0 3px 8px rgba(0,0,0,0.12), 0 3px 1px rgba(0,0,0,0.04); }
 
         .sub-tabs { background-color: transparent; padding: 0; border-bottom: 2px solid var(--border); border-radius: 0; width: 100%; margin-bottom: 20px; }
@@ -50,97 +53,139 @@
 
         .card { background-color: var(--card-bg); border-radius: 16px; padding: 30px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04); margin-bottom: 24px; overflow-x: auto; }
         .form-group { margin-bottom: 24px; }
-        label { display: block; font-weight: 600; margin-bottom: 10px; font-size: 17px; color: var(--text-main); }
-        select, input[type="text"], input[type="password"] { width: 100%; max-width: 400px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 12px; font-size: 17px; background: var(--bg-color); color: var(--text-main); outline: none; transition: border 0.2s; font-family: inherit; }
+        label { display: block; font-weight: 600; margin-bottom: 10px; font-size: 15px; color: var(--text-main); }
+        select, input[type="text"], input[type="password"], input[type="number"] { width: 100%; max-width: 400px; padding: 12px 16px; border: 1px solid var(--border); border-radius: 10px; font-size: 16px; background: var(--bg-color); color: var(--text-main); outline: none; transition: border 0.2s; font-family: inherit; box-sizing: border-box; }
         select:focus, input:focus { border-color: var(--primary); }
 
-        .badge { display: inline-block; padding: 6px 14px; border-radius: 20px; color: white; font-weight: 600; font-size: 14px; }
+        .badge { display: inline-flex; align-items: center; justify-content: center; padding: 6px 12px; border-radius: 20px; color: white; font-weight: 600; font-size: 13px; }
         .badge.low { background-color: var(--low); }
         .badge.medium { background-color: var(--medium); color: white; }
         .badge.high { background-color: var(--high); }
 
-        .cages-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-top: 15px; }
-        .cage-item { background: var(--bg-color); padding: 20px; border-radius: 14px; display: flex; align-items: center; cursor: pointer; font-size: 17px; font-weight: 500; transition: all 0.2s ease; border: 2px solid transparent; }
+        .cages-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; margin-top: 15px; }
+        .cage-item { background: var(--bg-color); padding: 16px; border-radius: 12px; display: flex; align-items: center; cursor: pointer; font-size: 15px; font-weight: 500; transition: all 0.2s ease; border: 1px solid var(--border); }
         .cage-item:hover { background: #E5E5EA; }
-        .cage-item:has(input:checked) { background: rgba(0, 122, 255, 0.1); border: 2px solid var(--primary); color: var(--primary); }
-        .cage-item input { margin-right: 15px; width: 22px; height: 22px; accent-color: var(--primary); cursor: pointer; }
+        .cage-item:has(input:checked) { background: rgba(0, 122, 255, 0.05); border: 1px solid var(--primary); color: var(--primary); }
+        .cage-item input { margin-right: 12px; width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer; }
         
-        .btn { display: inline-block; padding: 16px 32px; background-color: var(--primary); color: white; border: none; border-radius: 14px; font-size: 17px; font-weight: 600; cursor: pointer; transition: background-color 0.2s, transform 0.1s; }
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 14px 24px; background-color: var(--primary); color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; transition: background-color 0.2s, transform 0.1s; box-sizing: border-box; }
         .btn:hover { background-color: var(--primary-hover); }
         .btn:active { transform: scale(0.98); }
         .btn-success { background-color: var(--low); width: 100%; margin-bottom: 10px; }
         .btn-danger { background-color: var(--high); width: 100%; }
-        .btn-secondary { background-color: var(--text-main); padding: 10px 20px; font-size: 15px; }
+        .btn-secondary { background-color: var(--text-main); }
 
-        #result-box { display: none; margin-top: 24px; padding: 24px; background: #F2F9FF; border: 2px solid #D0E8FF; border-radius: 16px; }
-        #result-box h3 { margin-top: 0; color: var(--primary); }
-        #sample-stats { font-size: 15px; color: var(--text-main); margin-top: 15px; margin-bottom: 20px; font-weight: 500;}
+        #result-box { display: none; margin-top: 24px; padding: 24px; background: #F2F9FF; border: 1px solid #D0E8FF; border-radius: 12px; }
+        #result-box h3 { margin-top: 0; color: var(--primary); font-size: 18px;}
+        #sample-stats { font-size: 14px; color: var(--text-main); margin-top: 15px; margin-bottom: 20px; font-weight: 500;}
         #sample-list { list-style: none; padding: 0; margin: 15px 0; }
         
-        .audit-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 10px; font-size: 17px; font-weight: 500; }
-        .audit-item label { margin: 0; display: flex; align-items: center; color: var(--high); cursor: pointer; font-size: 16px; }
-        .audit-item input[type="checkbox"] { margin-right: 10px; width: 22px; height: 22px; accent-color: var(--high); }
+        .audit-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 8px; font-size: 15px; font-weight: 500; }
+        .audit-item label { margin: 0; display: flex; align-items: center; color: var(--high); cursor: pointer; font-size: 14px; }
+        .audit-item input[type="checkbox"] { margin-right: 10px; width: 18px; height: 18px; accent-color: var(--high); }
 
-        .stats-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        .stats-table th { text-align: left; padding: 12px 16px; color: var(--text-muted); font-size: 14px; font-weight: 600; border-bottom: 2px solid var(--border); }
-        .stats-table td { padding: 16px; border-bottom: 1px solid var(--border); font-size: 16px; font-weight: 500; vertical-align: middle; }
+        .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .stats-table { width: 100%; border-collapse: collapse; margin-top: 15px; min-width: 600px; }
+        .stats-table th { text-align: left; padding: 12px 16px; color: var(--text-muted); font-size: 13px; font-weight: 600; border-bottom: 1px solid var(--border); white-space: nowrap; }
+        .stats-table td { padding: 14px 16px; border-bottom: 1px solid var(--border); font-size: 14px; font-weight: 500; vertical-align: middle; }
         .stats-table tr { transition: background-color 0.2s; }
         .stats-table tr.clickable:hover td { background-color: #E3E3E8; cursor: pointer; }
         .stats-table tr:last-child td { border-bottom: none; }
         
         .header-flex { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
-        .admin-row { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
-        .admin-row input, .admin-row select { flex: 1; min-width: 200px; }
-        .btn-delete { background: transparent; border: none; color: var(--high); font-size: 20px; cursor: pointer; transition: transform 0.2s; }
-        .btn-delete:hover { transform: scale(1.2); }
+        .admin-row { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; align-items: flex-end; }
+        .admin-row input, .admin-row select { flex: 1; min-width: 180px; }
+        .btn-icon { background: transparent; border: none; color: var(--text-muted); font-size: 18px; cursor: pointer; transition: color 0.2s; padding: 5px; }
+        .btn-icon:hover { color: var(--high); }
 
-        .history-card { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 30px; }
-        .history-header { background-color: var(--primary); color: white; padding: 15px 20px; font-size: 18px; font-weight: 600; text-transform: capitalize; }
+        .history-card { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 20px; }
+        .history-header { background-color: var(--text-main); color: white; padding: 12px 20px; font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 10px;}
         .history-card .stats-table { margin-top: 0; }
 
         /* Queues */
         .queue-card { border: 1px solid var(--border); padding: 20px; border-radius: 12px; margin-bottom: 15px; display: flex; flex-direction: column; background: var(--card-bg); }
         .queue-header { display: flex; justify-content: space-between; align-items: center; width: 100%; flex-wrap: wrap; gap: 10px; }
-        .queue-card h4 { margin: 0 0 5px 0; font-size: 20px; }
-        .queue-card p { margin: 0; color: var(--text-muted); font-weight: 500;}
+        .queue-card h4 { margin: 0 0 5px 0; font-size: 18px; }
+        .queue-card p { margin: 0; color: var(--text-muted); font-size: 14px;}
 
         /* Dropdowns Cages */
         .cage-wrapper { display: flex; flex-direction: column; width: 100%; }
-        .expand-box { display: none; margin-top: 10px; padding: 15px; background: #FAFAFC; border: 1px solid var(--border); border-radius: 12px; }
-        .expand-box label { font-size: 16px; font-weight: 500; margin-bottom: 12px; display: flex; align-items: center; cursor: pointer; color: var(--text-main); }
+        .expand-box { display: none; margin-top: 8px; padding: 15px; background: #FAFAFC; border: 1px solid var(--border); border-radius: 10px; }
+        .expand-box label { font-size: 14px; font-weight: 500; margin-bottom: 10px; display: flex; align-items: center; cursor: pointer; color: var(--text-main); }
         .expand-box label:last-child { margin-bottom: 0; }
-        .expand-box label input[type="checkbox"] { margin-right: 12px; width: 20px; height: 20px; accent-color: var(--primary); }
-        .expand-box input[type="number"] { width: 120px; padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 16px; outline: none; }
+        .expand-box label input[type="checkbox"] { margin-right: 10px; width: 18px; height: 18px; accent-color: var(--primary); }
 
         /* Modal Profile Styles */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); backdrop-filter: blur(4px); }
         .modal-content { background-color: var(--card-bg); margin: 5% auto; padding: 30px; border-radius: 16px; width: 90%; max-width: 900px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); position: relative; animation: fadeIn 0.2s ease-in-out; }
-        .close-btn { position: absolute; right: 25px; top: 20px; color: var(--text-muted); font-size: 32px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .close-btn { position: absolute; right: 20px; top: 15px; color: var(--text-muted); font-size: 28px; cursor: pointer; transition: 0.2s; }
         .close-btn:hover { color: var(--high); }
         .chart-container { position: relative; height: 40vh; width: 100%; margin-top: 20px; }
 
         /* RTL */
-        [dir="rtl"] .cage-item input { margin-right: 0; margin-left: 15px; }
-        [dir="rtl"] .expand-box label input[type="checkbox"] { margin-right: 0; margin-left: 12px; }
+        [dir="rtl"] .cage-item input { margin-right: 0; margin-left: 12px; }
+        [dir="rtl"] .expand-box label input[type="checkbox"] { margin-right: 0; margin-left: 10px; }
         [dir="rtl"] .audit-item input[type="checkbox"] { margin-right: 0; margin-left: 10px; }
-        [dir="rtl"] .stats-table th { text-align: right; }
-        [dir="rtl"] .admin-row { flex-direction: row; }
-        [dir="rtl"] .close-btn { right: auto; left: 25px; }
+        [dir="rtl"] .stats-table th, [dir="rtl"] .stats-table td { text-align: right; }
+        [dir="rtl"] .close-btn { right: auto; left: 20px; }
+        [dir="rtl"] .svg-icon { margin-right: 0; margin-left: 8px; }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .card { padding: 20px; }
+            .tabs { width: 100%; }
+            .tabs button { flex: 1 1 100%; justify-content: center; margin-bottom: 5px; }
+            .sub-tabs button { flex: 1 1 100%; margin-bottom: 5px; border-radius: 8px;}
+            .header-top { flex-direction: column; align-items: flex-start; }
+            .cages-grid { grid-template-columns: 1fr; }
+            .admin-row { flex-direction: column; align-items: stretch; }
+            .admin-row input, .admin-row select, .admin-row button { width: 100%; max-width: 100%; }
+            .queue-header { flex-direction: column; align-items: flex-start; }
+            .queue-header .btn { width: 100%; justify-content: center; }
+            .modal-content { width: 95%; padding: 20px; margin: 10% auto; }
+        }
     </style>
 </head>
 <body>
 
+<svg style="display:none;">
+    <defs>
+        <g id="icon-cart"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></g>
+        <g id="icon-audit"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></g>
+        <g id="icon-stats"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></g>
+        <g id="icon-folder"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></g>
+        <g id="icon-settings"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.73 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .43-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.49-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></g>
+        <g id="icon-user"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></g>
+        <g id="icon-logout"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></g>
+        <g id="icon-save"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></g>
+        <g id="icon-box"><path d="M21 16.5c0 .38-.21.71-.53.88l-7.9 3.79c-.36.17-.77.17-1.14 0l-7.9-3.79C3.21 17.21 3 16.88 3 16.5v-9c0-.38.21-.71.53-.88l7.9-3.79c.36-.17.77-.17 1.14 0l7.9 3.79c.32.17.53.5.53.88v9zM12 4.15L6.04 7 12 9.85 17.96 7 12 4.15zM5 15.91l6 2.88V12L5 9.12v6.79zm14 0v-6.79L13 12v6.79l6-2.88z"/></g>
+        <g id="icon-check"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></g>
+        <g id="icon-search"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 12.01 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 12.01 14 9.5 14z"/></g>
+        <g id="icon-refresh"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></g>
+        <g id="icon-calendar"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></g>
+        <g id="icon-globe"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></g>
+        <g id="icon-trash"><path d="M16 9v10H8V9h8m-1.5-6h-5l-1 1H5v2h14V4h-3.5l-1-1zM18 7H6v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7z"/></g>
+        <g id="icon-close"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></g>
+    </defs>
+</svg>
+
 <div class="container">
     <div class="header-top">
-        <h1>🛒 Kološ Tracker</h1>
+        <h1>
+            <svg class="svg-icon" style="width:28px; height:28px; color:var(--primary);"><use href="#icon-cart"></use></svg>
+            Kološ Tracker
+        </h1>
         
         <div class="custom-lang-switcher" id="custom-lang">
-            <div class="select-selected" id="lang-current">🇨🇿 Čeština</div>
+            <div class="select-selected" id="lang-current">
+                <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzIDIiPjxyZWN0IHdpZHRoPSIzIiBoZWlnaHQ9IjIiIGZpbGw9IiNkNzE0MWEiLz48cmVjdCB3aWR0aD0iMyIgaGVpZ2h0PSIxIiBmaWxsPSIjZmZmIi8+PHBvbHlnb24gcG9pbnRzPSIwLDAgMCwyIDEuNSwxIiBmaWxsPSIjMTE0NTdlIi8+PC9zdmc+" class="flag-icon"> Čeština
+            </div>
             <div class="select-items" id="lang-list">
-                <div data-val="cs">🇨🇿 Čeština</div>
-                <div data-val="en">🇬🇧 English</div>
-                <div data-val="ru"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzIDIiPjxyZWN0IHdpZHRoPSIzIiBoZWlnaHQ9IjIiIGZpbGw9IiNmZmZmZmYiLz48cmVjdCB3aWR0aD0iMyIgaGVpZ2h0PSIwLjY2IiB5PSIwLjY2IiBmaWxsPSIjMDA4M2Q2Ii8+PC9zdmc+" class="flag-icon"> Русский</div>
-                <div data-val="he">🇮🇱 עברית</div>
+                <div data-val="cs"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzIDIiPjxyZWN0IHdpZHRoPSIzIiBoZWlnaHQ9IjIiIGZpbGw9IiNkNzE0MWEiLz48cmVjdCB3aWR0aD0iMyIgaGVpZ2h0PSIxIiBmaWxsPSIjZmZmIi8+PHBvbHlnb24gcG9pbnRzPSIwLDAgMCwyIDEuNSwxIiBmaWxsPSIjMTE0NTdlIi8+PC9zdmc+" class="flag-icon"> Čeština</div>
+                <div data-val="en"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2MCAzMCI+PHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjMwIiBmaWxsPSIjMDEyMTY5Ii8+PHBhdGggZD0iTTAsMCBMNjAsMzAgTTYwLDAgTDAsMzAiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLXdpZHRoPSI2Ii8+PHBhdGggZD0iTTAsMCBMNjAsMzAgTTYwLDAgTDAsMzAiIHN0cm9rZT0iI0M4MTAyRSIgc3Ryb2tlLXdpZHRoPSI0Ii8+PHBhdGggZD0iTTMwLDAgdjMwIE0wLDE1IGg2MCIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utd2lkdGg9IjEwIi8+PHBhdGggZD0iTTMwLDAgdjMwIE0wLDE1IGg2MCIgc3Ryb2tlPSIjQzgxMDJFIiBzdHJva2Utd2lkdGg9IjYiLz48L3N2Zz4=" class="flag-icon"> English</div>
+                <div data-val="ru"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzIDIiPjxyZWN0IHdpZHRoPSIzIiBoZWlnaHQ9IjIiIGZpbGw9IiNmZmYiLz48cmVjdCB3aWR0aD0iMyIgaGVpZ2h0PSIwLjY2IiB5PSIwLjY2IiBmaWxsPSIjMDA4M2Q2Ii8+PC9zdmc+" class="flag-icon"> Русский</div>
+                <div data-val="he"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzIDIiPjxyZWN0IHdpZHRoPSIzIiBoZWlnaHQ9IjIiIGZpbGw9IiNmZmYiLz48cmVjdCB3aWR0aD0iMyIgaGVpZ2h0PSIwLjMiIHk9IjAuMyIgZmlsbD0iIzAwMzhiOCIvPjxyZWN0IHdpZHRoPSIzIiBoZWlnaHQ9IjAuMyIgeT0iMS40IiBmaWxsPSIjMDAzOGI4Ii8+PHBvbHlnb24gcG9pbnRzPSIxLjUsMC43IDEuMiwxLjIgMS44LDEuMiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDAzOGI4IiBzdHJva2Utd2lkdGg9IjAuMSIvPjxwb2x5Z29uIHBvaW50cz0iMS41LDEuMyAxLjIsMC44IDEuOCwwLjgiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzAwMzhiOCIgc3Ryb2tlLXdpZHRoPSIwLjEiLz48L3N2Zz4=" class="flag-icon"> עברית</div>
             </div>
         </div>
     </div>
@@ -148,85 +193,105 @@
 
 <div id="screen-auth" class="screen active-screen container">
     <div class="card" style="text-align: center;">
-        <h2 data-i18n="auth_title" style="margin-bottom: 30px;">Vyberte roli</h2>
-        <button class="btn role-btn" style="background-color: var(--text-main);" onclick="showScreen('screen-login')" data-i18n="role_tl">Team Leader</button>
-        <button class="btn role-btn" onclick="showScreen('screen-emp')" data-i18n="role_emp">Zaměstnanec</button>
+        <h2 data-i18n="auth_title" style="margin-bottom: 30px; justify-content: center;">Vyberte přístupovou roli</h2>
+        <button class="btn role-btn" style="background-color: var(--text-main);" onclick="showScreen('screen-login')">
+            <svg class="svg-icon"><use href="#icon-settings"></use></svg> <span data-i18n="role_tl">Vedoucí týmu (TL)</span>
+        </button>
+        <button class="btn role-btn" onclick="showScreen('screen-emp')">
+            <svg class="svg-icon"><use href="#icon-user"></use></svg> <span data-i18n="role_emp">Zaměstnanec</span>
+        </button>
     </div>
 </div>
 
 <div id="screen-login" class="screen container">
-    <button class="btn btn-secondary" style="margin-bottom:20px;" onclick="showScreen('screen-auth')" data-i18n="btn_back">🔙 Zpět</button>
+    <button class="btn btn-secondary" style="margin-bottom:20px; width: fit-content;" onclick="showScreen('screen-auth')">
+        <svg class="svg-icon"><use href="#icon-back"></use></svg> <span data-i18n="btn_back">Zpět</span>
+    </button>
     <div class="card">
-        <h2 data-i18n="login_title">Přihlášení (TL)</h2>
+        <h2 data-i18n="login_title">Přihlášení do systému</h2>
         <div class="form-group">
-            <input type="text" id="login-user" placeholder="Login (Albert)">
+            <input type="text" id="login-user" placeholder="Login">
         </div>
         <div class="form-group">
-            <input type="password" id="login-pass" placeholder="Password (123)">
+            <input type="password" id="login-pass" placeholder="Heslo">
         </div>
-        <button class="btn" style="width: 100%;" onclick="doLogin()" data-i18n="btn_enter">Přihlásit se</button>
+        <button class="btn" style="width: 100%;" onclick="doLogin()">
+            <svg class="svg-icon"><use href="#icon-check"></use></svg> <span data-i18n="btn_enter">Přihlásit se</span>
+        </button>
     </div>
 </div>
 
 <div id="screen-emp" class="screen container">
-    <button class="btn btn-secondary" style="margin-bottom:20px;" onclick="showScreen('screen-auth')" data-i18n="btn_back">🔙 Zpět</button>
+    <button class="btn btn-secondary" style="margin-bottom:20px; width: fit-content;" onclick="showScreen('screen-auth')">
+        <span data-i18n="btn_back">Zpět</span>
+    </button>
     
     <div class="card">
-        <h2 data-i18n="emp_select_name">Vyberte své jméno:</h2>
-        <select id="emp-who" class="form-group" style="width:100%; max-width:100%; font-size:20px; padding:15px;"></select>
+        <h2 data-i18n="emp_select_name">Zvolte své jméno:</h2>
+        <select id="emp-who" class="form-group" style="width:100%; max-width:100%;"></select>
     </div>
 
     <div class="card">
-        <h3 data-i18n="emp_cages">Vyberte dokončené klece:</h3>
-        <p style="color: var(--low); font-weight: bold; margin-top: -10px; font-size: 14px;" data-i18n="emp_cages_info">Šedé klece byly již zpracovány.</p>
+        <h3 data-i18n="emp_cages" style="margin-top:0;">Označte dokončené klece:</h3>
+        <p style="color: var(--text-muted); font-weight: 500; font-size: 14px;" data-i18n="emp_cages_info">Poznámka: Šedé klece byly již zpracovány v rámci aktuálního cyklu.</p>
         <div id="emp-cages-list" class="cages-grid"></div>
-        <button class="btn" style="width: 100%; margin-top:25px;" onclick="submitEmp()" data-i18n="emp_submit">Dokončit a odeslat</button>
+        <button class="btn" style="width: 100%; margin-top:25px;" onclick="submitEmp()">
+            <svg class="svg-icon"><use href="#icon-check"></use></svg> <span data-i18n="emp_submit">Odeslat ke kontrole</span>
+        </button>
     </div>
 </div>
 
 <div id="screen-tl-dash" class="screen container">
     <div style="display:flex; justify-content:flex-start; margin-bottom:15px;">
-        <button class="btn btn-secondary" style="background:var(--high);" onclick="showScreen('screen-auth')" data-i18n="btn_logout">🚪 Odhlásit</button>
+        <button class="btn btn-secondary" style="background:var(--high);" onclick="showScreen('screen-auth')">
+            <svg class="svg-icon"><use href="#icon-logout"></use></svg> <span data-i18n="btn_logout">Odhlásit se</span>
+        </button>
     </div>
 
     <div class="tabs">
-        <button id="tab-audit" class="active" onclick="switchTab('audit')" data-i18n="tab_audit">📝 Audit</button>
-        <button id="tab-stats" onclick="switchTab('stats')" data-i18n="tab_stats">📊 Statistika</button>
-        <button id="tab-data" onclick="switchTab('data')" data-i18n="tab_data">📂 Data</button>
-        <button id="tab-settings" onclick="switchTab('settings')" data-i18n="tab_settings">⚙️ Zaměstnanci</button>
+        <button id="tab-audit" class="active" onclick="switchTab('audit')"><svg class="svg-icon"><use href="#icon-audit"></use></svg> <span data-i18n="tab_audit">Audit</span></button>
+        <button id="tab-stats" onclick="switchTab('stats')"><svg class="svg-icon"><use href="#icon-stats"></use></svg> <span data-i18n="tab_stats">Statistika</span></button>
+        <button id="tab-data" onclick="switchTab('data')"><svg class="svg-icon"><use href="#icon-folder"></use></svg> <span data-i18n="tab_data">Data</span></button>
+        <button id="tab-settings" onclick="switchTab('settings')"><svg class="svg-icon"><use href="#icon-settings"></use></svg> <span data-i18n="tab_settings">Správa</span></button>
     </div>
 
     <div id="sec-audit" class="section active">
         <div class="tabs sub-tabs">
-            <button id="mode-auto-btn" class="active" onclick="setAuditMode('auto')" data-i18n="audit_mode_auto">Automaticky (Fronta)</button>
-            <button id="mode-manual-btn" onclick="setAuditMode('manual')" data-i18n="audit_mode_manual">Manuálně</button>
+            <button id="mode-auto-btn" class="active" onclick="setAuditMode('auto')" data-i18n="audit_mode_auto">Automaticky (Fronta požadavků)</button>
+            <button id="mode-manual-btn" onclick="setAuditMode('manual')" data-i18n="audit_mode_manual">Manuální zadání</button>
         </div>
 
         <div id="audit-auto-view">
-            <button class="btn" style="margin-bottom:15px; background:var(--high); font-size: 15px; padding: 12px 20px;" onclick="resetKPICycle()" data-i18n="reset_kpi">🔄 Resetovat 2denní cyklus (KPI)</button>
+            <button class="btn" style="margin-bottom:15px; background:var(--high); font-size: 14px; padding: 10px 18px;" onclick="resetKPICycle()">
+                <svg class="svg-icon"><use href="#icon-refresh"></use></svg> <span data-i18n="reset_kpi">Resetovat cyklus KPI</span>
+            </button>
             <div id="auto-queue-list"></div>
         </div>
 
         <div id="audit-manual-view" style="display:none;">
             <div class="card">
-                <label data-i18n="select_worker">Vyberte zaměstnance:</label>
+                <label data-i18n="select_worker">Vyberte zaměstnance pro kontrolu:</label>
                 <select id="worker-select" onchange="updateWorkerRisk()"></select>
                 <div id="worker-risk-display" style="margin-top: 10px;"></div>
             </div>
             <div class="card">
-                <label data-i18n="done_cages">Dokončené klece:</label>
+                <label data-i18n="done_cages">Zpracované klece k ověření:</label>
                 <div id="tl-cages-list" class="cages-grid"></div>
-                <button class="btn" style="margin-top:20px;" onclick="generateSampleManual()" data-i18n="btn_generate">Vygenerovat vzorek</button>
+                <button class="btn" style="margin-top:20px;" onclick="generateSampleManual()">
+                    <svg class="svg-icon"><use href="#icon-search"></use></svg> <span data-i18n="btn_generate">Vygenerovat kontrolní vzorek</span>
+                </button>
             </div>
         </div>
 
         <div id="result-box">
-            <h3 data-i18n="cages_to_test">🔍 Klece ke kontrole:</h3>
+            <h3 data-i18n="cages_to_test">Položky vybrané k fyzické kontrole:</h3>
             <p id="sample-stats"></p>
-            <p style="font-size: 15px; color: var(--text-muted); margin-bottom: 10px;" data-i18n="click_error">Označte případné chyby:</p>
+            <p style="font-size: 15px; color: var(--text-muted); margin-bottom: 10px;" data-i18n="click_error">Označte položky, u kterých byl zjištěn nedostatek:</p>
             <ul id="sample-list"></ul>
             <div style="margin-top: 25px;">
-                <button class="btn" style="width: 100%;" onclick="finishAudit()" data-i18n="btn_save_audit">💾 Uložit výsledek kontroly</button>
+                <button class="btn" style="width: 100%;" onclick="finishAudit()">
+                    <svg class="svg-icon"><use href="#icon-save"></use></svg> <span data-i18n="btn_save_audit">Uložit výsledek auditu</span>
+                </button>
             </div>
         </div>
     </div>
@@ -235,67 +300,83 @@
         <div class="card">
             <div class="header-flex">
                 <div>
-                    <h2 data-i18n="stats_title">Statistika (Měsíc) 🏆</h2>
-                    <p style="color: var(--text-muted); font-size: 14px; margin: 5px 0 0 0;" data-i18n="stats_formula">Chybovost = (Chyby / Hotové klece) × 100</p>
+                    <h2 data-i18n="stats_title">Měsíční statistika výkonnosti</h2>
+                    <p style="color: var(--text-muted); font-size: 14px; margin: 5px 0 0 0;" data-i18n="stats_formula">Výpočet chybovosti: (Chyby / Zpracované klece) × 100</p>
                 </div>
-                <button class="btn btn-secondary" onclick="closeMonth()" data-i18n="btn_close_month">📅 Uzavřít měsíc</button>
+                <button class="btn btn-secondary" onclick="closeMonth()">
+                    <svg class="svg-icon"><use href="#icon-calendar"></use></svg> <span data-i18n="btn_close_month">Uzavřít účetní měsíc</span>
+                </button>
             </div>
-            <p style="font-size: 13px; color: var(--primary);" data-i18n="dbl_click_hint">💡 Dvojklikem na řádek otevřete graf profilu zaměstnance.</p>
-            <table class="stats-table">
-                <thead>
-                    <tr><th data-i18n="th_name">Zaměstnanec</th><th data-i18n="th_cages">Klece celkem</th><th data-i18n="th_shifts">Směny (dny)</th><th data-i18n="th_avg">Průměr / den</th><th data-i18n="th_errors">Počet chyb</th><th data-i18n="th_error_rate">Chybovost (%)</th><th data-i18n="th_risk">Aktuální Risk</th></tr>
-                </thead>
-                <tbody id="stats-worker-list"></tbody>
-            </table>
+            <p style="font-size: 13px; color: var(--primary);" data-i18n="dbl_click_hint">Poznámka: Dvojitým kliknutím na řádek zobrazíte detailní graf vývoje zaměstnance.</p>
+            <div class="table-responsive">
+                <table class="stats-table">
+                    <thead>
+                        <tr><th data-i18n="th_name">Zaměstnanec</th><th data-i18n="th_cages">Celkem klecí</th><th data-i18n="th_shifts">Prac. dny</th><th data-i18n="th_avg">Průměr / den</th><th data-i18n="th_errors">Chyby</th><th data-i18n="th_error_rate">Chybovost (%)</th><th data-i18n="th_risk">Status rizika</th></tr>
+                    </thead>
+                    <tbody id="stats-worker-list"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
     <div id="sec-data" class="section">
         <div class="card">
-            <h2 data-i18n="data_title">Archiv a Globální data 🗂️</h2>
+            <h2 data-i18n="data_title">Systémový archiv dat</h2>
             <div class="tabs sub-tabs">
-                <button id="subtab-history" class="active" onclick="switchDataSubTab('history')" data-i18n="subtab_history">📅 Měsíční historie</button>
-                <button id="subtab-alltime" onclick="switchDataSubTab('alltime')" data-i18n="subtab_alltime">🌍 Celková statistika (All-time)</button>
+                <button id="subtab-history" class="active" onclick="switchDataSubTab('history')">
+                    <svg class="svg-icon"><use href="#icon-calendar"></use></svg> <span data-i18n="subtab_history">Měsíční přehledy</span>
+                </button>
+                <button id="subtab-alltime" onclick="switchDataSubTab('alltime')">
+                    <svg class="svg-icon"><use href="#icon-globe"></use></svg> <span data-i18n="subtab_alltime">Globální statistika</span>
+                </button>
             </div>
-            <p style="font-size: 13px; color: var(--primary);" data-i18n="dbl_click_hint">💡 Dvojklikem na řádek otevřete graf profilu zaměstnance.</p>
+            <p style="font-size: 13px; color: var(--primary);" data-i18n="dbl_click_hint">Poznámka: Dvojitým kliknutím na řádek zobrazíte detailní graf vývoje zaměstnance.</p>
             
             <div id="view-history">
                 <div id="history-container"></div>
             </div>
             <div id="view-alltime" style="display: none;">
-                <table class="stats-table">
-                    <thead><tr><th data-i18n="th_name">Zaměstnanec</th><th data-i18n="th_cages_all">Klece (All-time)</th><th data-i18n="th_shifts_all">Směny celkem</th><th data-i18n="th_avg">Průměr / den</th><th data-i18n="th_errors_all">Chyby (All-time)</th><th data-i18n="th_error_rate_all">Chybovost (All-time)</th></tr></thead>
-                    <tbody id="alltime-worker-list"></tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="stats-table">
+                        <thead><tr><th data-i18n="th_name">Zaměstnanec</th><th data-i18n="th_cages_all">Úhrn klecí</th><th data-i18n="th_shifts_all">Úhrn prac. dnů</th><th data-i18n="th_avg">Průměr / den</th><th data-i18n="th_errors_all">Úhrn chyb</th><th data-i18n="th_error_rate_all">Celková chybovost</th></tr></thead>
+                        <tbody id="alltime-worker-list"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 
     <div id="sec-settings" class="section">
         <div class="card">
-            <h2 data-i18n="settings_title">Správa zaměstnanců</h2>
+            <h2 data-i18n="settings_title">Administrace personálu</h2>
             <div class="form-group admin-row">
                 <input type="text" id="new-worker-name" placeholder="Jméno a příjmení" data-i18n-placeholder="placeholder_name">
                 <select id="new-worker-risk">
-                    <option value="low">Low (10%)</option>
-                    <option value="medium">Medium (30%)</option>
-                    <option value="high">High (50%)</option>
+                    <option value="low">Nízké riziko (10%)</option>
+                    <option value="medium">Střední riziko (30%)</option>
+                    <option value="high">Vysoké riziko (50%)</option>
                 </select>
-                <button class="btn btn-secondary" style="border-radius: 12px;" onclick="addWorker()" data-i18n="btn_add_worker">Přidat do cloudu</button>
+                <button class="btn btn-secondary" onclick="addWorker()">
+                    <svg class="svg-icon"><use href="#icon-save"></use></svg> <span data-i18n="btn_add_worker">Přidat do systému</span>
+                </button>
             </div>
-            <table class="stats-table">
-                <thead><tr><th data-i18n="th_name">Zaměstnanec</th><th data-i18n="th_risk_set">Nastavený Risk</th><th style="text-align: right;" data-i18n="th_action">Akce</th></tr></thead>
-                <tbody id="admin-worker-list"></tbody>
-            </table>
+            <div class="table-responsive">
+                <table class="stats-table">
+                    <thead><tr><th data-i18n="th_name">Zaměstnanec</th><th data-i18n="th_risk_set">Přiřazené riziko</th><th style="text-align: right;" data-i18n="th_action">Správa</th></tr></thead>
+                    <tbody id="admin-worker-list"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
 
 <div id="profile-modal" class="modal">
     <div class="modal-content">
-        <span class="close-btn" onclick="closeProfile()">&times;</span>
-        <h2 id="profile-title" style="margin-bottom: 20px;">Profil zaměstnance</h2>
-        <button class="btn btn-secondary" id="btn-toggle-global" onclick="toggleGlobalStats()" data-i18n="btn_toggle_global" style="margin-bottom: 15px;">Zobrazit průměr skladu</button>
+        <span class="close-btn" onclick="closeProfile()"><svg class="svg-icon"><use href="#icon-close"></use></svg></span>
+        <h2 id="profile-title" style="margin-bottom: 20px;">Analytický profil</h2>
+        <button class="btn btn-secondary" id="btn-toggle-global" onclick="toggleGlobalStats()" style="margin-bottom: 15px;">
+            <svg class="svg-icon"><use href="#icon-stats"></use></svg> <span data-i18n="btn_toggle_global">Zobrazit srovnání s průměrem</span>
+        </button>
         <div class="chart-container">
             <canvas id="profileChart"></canvas>
         </div>
@@ -303,42 +384,43 @@
 </div>
 
 <script>
-    // --- 1. DICTIONARY (I18N) FORMAL VERSION ---
+    // --- 1. DICTIONARY (I18N) FORMAL & EMOJI-FREE VERSION ---
     const dict = {
         cs: {
-            auth_title: "Vyberte roli", role_tl: "Team Leader", role_emp: "Zaměstnanec", btn_back: "🔙 Zpět", btn_logout: "🚪 Odhlásit",
-            login_title: "Přihlášení (TL)", btn_enter: "Přihlásit se", login_err: "Nesprávné přihlašovací údaje!",
-            emp_select_name: "Vyberte své jméno:", emp_cages: "Vyberte dokončené klece:", emp_cages_info: "Šedé klece byly již zpracovány.", emp_submit: "Dokončit a odeslat", emp_success: "Úspěšně odesláno ke kontrole.", emp_confirm_submit: "Opravdu si přejete odeslat kontrolu?",
-            audit_mode_auto: "Automaticky (Fronta)", audit_mode_manual: "Manuálně", reset_kpi: "🔄 Resetovat 2denní cyklus (KPI)", reset_kpi_confirm: "Opravdu si přejete smazat historii dokončených klecí pro nový cyklus?", queue_empty: "Žádné čekající kontroly.", btn_check: "Zkontrolovat", btn_cancel: "Zrušit", cages_count: "Počet klecí: %count%",
-            show_details: "Zobrazit detaily ▾", hide_details: "Skrýt detaily ▴", alert_cancel_confirm: "Opravdu si přejete zrušit tuto kontrolu a uvolnit klece?",
-            tab_audit: "📝 Audit", tab_stats: "📊 Statistika", tab_data: "📂 Data", tab_settings: "⚙️ Zaměstnanci", select_worker: "Vyberte zaměstnance:", done_cages: "Dokončené klece:", btn_generate: "Vygenerovat vzorek", cages_to_test: "🔍 Klece ke kontrole:", click_error: "Označte případné chyby:", btn_save_audit: "💾 Uložit výsledek kontroly", stats_title: "Statistika (Měsíc) 🏆", stats_formula: "Chybovost = (Chyby / Hotové klece) × 100", btn_close_month: "📅 Uzavřít měsíc", th_name: "Zaměstnanec", th_cages: "Klece celkem", th_shifts: "Směny (dny)", th_avg: "Průměr / den", th_errors: "Počet chyb", th_error_rate: "Chybovost (%)", th_risk: "Aktuální Risk", data_title: "Archiv a Globální data 🗂️", subtab_history: "📅 Měsíční historie", subtab_alltime: "🌍 Celková statistika", history_desc: "Zde se ukládají statistiky po uzavření každého měsíce.", alltime_desc: "Součet všech klecí a chyb za celou dobu působení.", th_cages_all: "Klece (All-time)", th_shifts_all: "Směny celkem", th_errors_all: "Chyby (All-time)", th_error_rate_all: "Chybovost (All-time)", settings_title: "Správa zaměstnanců", placeholder_name: "Jméno a příjmení", btn_add_worker: "Přidat do cloudu", th_risk_set: "Nastavený Risk", th_action: "Akce", alert_no_worker: "Vyberte prosím zaměstnance.", alert_no_cage: "Vyberte prosím alespoň jednu klec.", alert_no_count: "Zadejte prosím počet klecí u kategorie:", alert_saved_err: "Uloženo. Zaměstnanec %name% má %err% chyb(y).", alert_saved_ok: "Uloženo. Kontrola proběhla v pořádku (0 chyb).", alert_add_ok: "Zaměstnanec byl úspěšně přidán.", alert_del_confirm: "Opravdu si přejete smazat zaměstnance: %name%?", alert_month_confirm: "Opravdu si přejete uzavřít měsíc?\nData budou uložena do archivu, rizika aktualizována a statistiky vynulovány.", alert_month_ok: "Měsíc byl úspěšně uzavřen.", lbl_error: "Chyba", lbl_count: "Zadejte počet:", placeholder_count: "Např. 2", lbl_empty_db: "-- Přidejte zaměstnance v nastavení --", lbl_empty_history: "Zatím zde nejsou žádná data.", stat_done: "Celkem:", stat_risk: "Úroveň rizika:", stat_test: "Ke kontrole:", dbl_click_hint: "💡 Dvojklikem na řádek otevřete graf profilu zaměstnance.", profile_title: "Profil zaměstnance: %name%", btn_toggle_global: "Zobrazit průměr skladu", current_month: "Aktuální", chart_avg_cages: "Průměr klecí (Zaměstnanec)", chart_err_rate: "Chybovost (Zaměstnanec) %", chart_global_avg: "Průměr klecí (Sklad)", chart_global_err: "Chybovost (Sklad) %", done_blocked: "(Již zpracováno)"
+            auth_title: "Zvolte přístupovou roli", role_tl: "Vedoucí týmu (TL)", role_emp: "Zaměstnanec", btn_back: "Zpět", btn_logout: "Odhlásit se",
+            login_title: "Přihlášení do systému", btn_enter: "Přihlásit se", login_err: "Zadané identifikační údaje jsou nesprávné.",
+            emp_select_name: "Zvolte prosím své jméno:", emp_cages: "Označte dokončené klece:", emp_cages_info: "Poznámka: Šedé klece byly již zpracovány v rámci aktuálního cyklu.", emp_submit: "Odeslat ke kontrole", emp_success: "Data byla úspěšně odeslána ke kontrole.", emp_confirm_submit: "Opravdu si přejete odeslat zadaná data k auditu?",
+            audit_mode_auto: "Automaticky (Fronta požadavků)", audit_mode_manual: "Manuální zadání", reset_kpi: "Resetovat cyklus KPI", reset_kpi_confirm: "Skutečně si přejete vymazat historii blokovaných klecí a zahájit nový cyklus?", queue_empty: "Aktuálně nejsou žádné nevyřízené požadavky ke kontrole.", btn_check: "Zahájit kontrolu", btn_cancel: "Zamítnout požadavek", cages_count: "Počet nahlášených klecí: %count%",
+            show_details: "Zobrazit detaily ▾", hide_details: "Skrýt detaily ▴", alert_cancel_confirm: "Skutečně si přejete zamítnout tento požadavek a uvolnit dotčené klece zpět do systému?",
+            tab_audit: "Audit", tab_stats: "Statistika", tab_data: "Data", tab_settings: "Správa", select_worker: "Vyberte zaměstnance pro kontrolu:", done_cages: "Zpracované klece k ověření:", btn_generate: "Vygenerovat kontrolní vzorek", cages_to_test: "Položky vybrané k fyzické kontrole:", click_error: "Označte položky, u kterých byl zjištěn nedostatek:", btn_save_audit: "Uložit výsledek auditu", stats_title: "Měsíční statistika výkonnosti", stats_formula: "Výpočet chybovosti: (Chyby / Zpracované klece) × 100", btn_close_month: "Uzavřít účetní měsíc", th_name: "Zaměstnanec", th_cages: "Celkem klecí", th_shifts: "Prac. dny", th_avg: "Průměr / den", th_errors: "Zjištěné chyby", th_error_rate: "Chybovost (%)", th_risk: "Status rizika", data_title: "Systémový archiv dat", subtab_history: "Měsíční přehledy", subtab_alltime: "Globální statistika", history_desc: "Archiv výkonnosti po jednotlivých účetních obdobích.", alltime_desc: "Agregovaná data za celou dobu evidence v systému.", th_cages_all: "Úhrn klecí", th_shifts_all: "Úhrn prac. dnů", th_errors_all: "Úhrn chyb", th_error_rate_all: "Celková chybovost", settings_title: "Administrace personálu", placeholder_name: "Jméno a příjmení", btn_add_worker: "Přidat do systému", th_risk_set: "Přiřazené riziko", th_action: "Správa", alert_no_worker: "Zvolte prosím zaměstnance ze seznamu.", alert_no_cage: "Vyberte prosím alespoň jednu položku k analýze.", alert_no_count: "Zadejte prosím přesný počet pro kategorii:", alert_saved_err: "Záznam byl uložen. U zaměstnance %name% byl zjištěn následující počet pochybení: %err%.", alert_saved_ok: "Záznam byl uložen. Kontrola u zaměstnance %name% proběhla zcela bez nálezu.", alert_add_ok: "Zaměstnanec byl úspěšně zaevidován.", alert_del_confirm: "Opravdu si přejete trvale odstranit záznam zaměstnance: %name%?", alert_month_confirm: "Potvrzujete záměr uzavřít měsíc?\nData budou trvale archivována, skóre vynulováno a rizikové profily automaticky aktualizovány.", alert_month_ok: "Měsíční data byla úspěšně zpracována a uložena.", lbl_error: "Zaznamenat chybu", lbl_count: "Zadejte množství:", placeholder_count: "Např. 2", lbl_empty_db: "-- Databáze je prázdná --", lbl_empty_history: "Nejsou k dispozici žádné archivní záznamy.", stat_done: "Celkový objem:", stat_risk: "Stanovené riziko:", stat_test: "Vybráno k ověření:", dbl_click_hint: "Poznámka: Dvojitým kliknutím na řádek zobrazíte detailní analytický graf.", profile_title: "Analytický profil: %name%", btn_toggle_global: "Zobrazit srovnání s průměrem", current_month: "Aktuální", chart_avg_cages: "Výkonnost (Zaměstnanec)", chart_err_rate: "Míra pochybení (Zaměstnanec) %", chart_global_avg: "Výkonnost (Průměr závodu)", chart_global_err: "Míra pochybení (Průměr závodu) %", done_blocked: "(Již zpracováno)"
         },
         en: {
-            auth_title: "Select Role", role_tl: "Team Leader", role_emp: "Employee", btn_back: "🔙 Back", btn_logout: "🚪 Logout",
-            login_title: "Login (TL)", btn_enter: "Log In", login_err: "Incorrect login credentials.",
-            emp_select_name: "Please select your name:", emp_cages: "Select completed cages:", emp_cages_info: "Grey cages have already been processed.", emp_submit: "Complete and Submit", emp_success: "Successfully submitted for review.", emp_confirm_submit: "Are you sure you want to submit this inspection?",
-            audit_mode_auto: "Automatic (Queue)", audit_mode_manual: "Manual", reset_kpi: "🔄 Reset 2-day cycle (KPI)", reset_kpi_confirm: "Are you sure you want to clear completed cages for a new cycle?", queue_empty: "No pending checks.", btn_check: "Check", btn_cancel: "Cancel", cages_count: "Cages count: %count%",
-            show_details: "Show details ▾", hide_details: "Hide details ▴", alert_cancel_confirm: "Are you sure you want to cancel this request and release the cages?",
-            tab_audit: "📝 Audit", tab_stats: "📊 Statistics", tab_data: "📂 Data", tab_settings: "⚙️ Employees", select_worker: "Select employee:", done_cages: "Completed cages:", btn_generate: "Generate Sample", cages_to_test: "🔍 Cages for inspection:", click_error: "Mark any errors:", btn_save_audit: "💾 Save inspection result", stats_title: "Statistics (Month) 🏆", stats_formula: "Error Rate = (Errors / Total Cages) × 100", btn_close_month: "📅 Close Month", th_name: "Employee", th_cages: "Total Cages", th_shifts: "Shifts (days)", th_avg: "Avg / day", th_errors: "Errors", th_error_rate: "Error Rate (%)", th_risk: "Current Risk", data_title: "Archive & Global Data 🗂️", subtab_history: "📅 Monthly History", subtab_alltime: "🌍 Overall Stats", history_desc: "Statistics are saved here after closing each month.", alltime_desc: "Sum of all cages and errors for the entire period.", th_cages_all: "Cages (All-time)", th_shifts_all: "Total Shifts", th_errors_all: "Errors (All-time)", th_error_rate_all: "Error Rate (All-time)", settings_title: "Employee Management", placeholder_name: "Full Name", btn_add_worker: "Add to Cloud", th_risk_set: "Set Risk", th_action: "Action", alert_no_worker: "Please select an employee.", alert_no_cage: "Please select at least one cage.", alert_no_count: "Please enter a count for category:", alert_saved_err: "Saved. %name% has %err% error(s) recorded.", alert_saved_ok: "Saved. Inspection passed successfully (0 errors).", alert_add_ok: "Employee successfully added.", alert_del_confirm: "Are you sure you want to delete employee: %name%?", alert_month_confirm: "Are you sure you want to close the month?\nData will be archived, risks updated, and statistics reset.", alert_month_ok: "Month successfully closed.", lbl_error: "Error", lbl_count: "Enter count:", placeholder_count: "E.g. 2", lbl_empty_db: "-- Add employees in settings --", lbl_empty_history: "No data available yet.", stat_done: "Total:", stat_risk: "Risk Level:", stat_test: "To inspect:", dbl_click_hint: "💡 Double-click a row to view employee profile chart.", profile_title: "Employee Profile: %name%", btn_toggle_global: "Show Warehouse Average", current_month: "Current", chart_avg_cages: "Avg Cages (Employee)", chart_err_rate: "Error Rate (Employee) %", chart_global_avg: "Avg Cages (Warehouse)", chart_global_err: "Error Rate (Warehouse) %", done_blocked: "(Already processed)"
+            auth_title: "Select Access Role", role_tl: "Team Leader", role_emp: "Employee", btn_back: "Back", btn_logout: "Log Out",
+            login_title: "System Authentication", btn_enter: "Log In", login_err: "Invalid credentials provided.",
+            emp_select_name: "Please select your profile:", emp_cages: "Indicate completed tasks:", emp_cages_info: "Note: Greyed out items have been processed in the current cycle.", emp_submit: "Submit for Verification", emp_success: "Data successfully submitted.", emp_confirm_submit: "Do you confirm the submission of this data for audit?",
+            audit_mode_auto: "Automatic (Request Queue)", audit_mode_manual: "Manual Entry", reset_kpi: "Reset KPI Cycle", reset_kpi_confirm: "Confirm clearing the active task cycle to begin a new evaluation period?", queue_empty: "No pending verification requests.", btn_check: "Initiate Audit", btn_cancel: "Reject Request", cages_count: "Reported items: %count%",
+            show_details: "View details ▾", hide_details: "Hide details ▴", alert_cancel_confirm: "Confirm rejection of this request? Affected items will be released back into the system.",
+            tab_audit: "Audit", tab_stats: "Statistics", tab_data: "Archive", tab_settings: "Personnel", select_worker: "Select employee for audit:", done_cages: "Processed items to verify:", btn_generate: "Generate Control Sample", cages_to_test: "Items selected for physical inspection:", click_error: "Mark verified discrepancies:", btn_save_audit: "Save Audit Results", stats_title: "Monthly Performance Metrics", stats_formula: "Error Rate Calculation: (Errors / Total Processed) × 100", btn_close_month: "Conclude Financial Month", th_name: "Employee", th_cages: "Total Volume", th_shifts: "Active Days", th_avg: "Daily Avg.", th_errors: "Discrepancies", th_error_rate: "Error Rate (%)", th_risk: "Risk Profile", data_title: "System Data Archive", subtab_history: "Monthly Reports", subtab_alltime: "Global Statistics", history_desc: "Performance records aggregated by accounting periods.", alltime_desc: "Cumulative data across the entire recorded tenure.", th_cages_all: "Lifetime Volume", th_shifts_all: "Lifetime Days", th_errors_all: "Lifetime Errors", th_error_rate_all: "Overall Error Rate", settings_title: "Personnel Administration", placeholder_name: "Full Name", btn_add_worker: "Register Employee", th_risk_set: "Assigned Risk", th_action: "Management", alert_no_worker: "Please specify an employee profile.", alert_no_cage: "Please select at least one item for analysis.", alert_no_count: "Please provide exact quantity for category:", alert_saved_err: "Record saved. Employee %name% registered %err% discrepancy/ies.", alert_saved_ok: "Record saved. Inspection for %name% concluded with zero discrepancies.", alert_add_ok: "Employee profile successfully created.", alert_del_confirm: "Irreversibly delete employee profile: %name%?", alert_month_confirm: "Confirm monthly closure?\nData will be archived, operational scores reset, and risk metrics recalibrated.", alert_month_ok: "Monthly data successfully processed and archived.", lbl_error: "Register Discrepancy", lbl_count: "Specify quantity:", placeholder_count: "E.g. 2", lbl_empty_db: "-- Database is empty --", lbl_empty_history: "No historical records available.", stat_done: "Total Volume:", stat_risk: "Assessed Risk:", stat_test: "Selected for Review:", dbl_click_hint: "Note: Double-click a row to access detailed analytical charts.", profile_title: "Analytical Profile: %name%", btn_toggle_global: "Display Facility Average", current_month: "Current", chart_avg_cages: "Throughput (Employee)", chart_err_rate: "Error Rate (Employee) %", chart_global_avg: "Throughput (Facility Avg.)", chart_global_err: "Error Rate (Facility Avg.) %", done_blocked: "(Processed)"
         },
         ru: {
-            auth_title: "Выберите роль", role_tl: "Тимлид", role_emp: "Сотрудник", btn_back: "🔙 Назад", btn_logout: "🚪 Выйти",
-            login_title: "Вход (TL)", btn_enter: "Войти", login_err: "Неверные данные для входа.",
-            emp_select_name: "Выберите ваше имя:", emp_cages: "Выберите выполненные клети:", emp_cages_info: "Серые клети уже обработаны в текущем цикле.", emp_submit: "Завершить и отправить", emp_success: "Успешно отправлено на проверку.", emp_confirm_submit: "Вы действительно хотите отправить данные на проверку?",
-            audit_mode_auto: "Очередь (Авто)", audit_mode_manual: "Вручную", reset_kpi: "🔄 Сбросить 2-дневный цикл (KPI)", reset_kpi_confirm: "Вы действительно хотите очистить выполненные клети для начала нового цикла?", queue_empty: "Ожидающих проверок нет.", btn_check: "Проверить", btn_cancel: "Отменить", cages_count: "Количество клетей: %count%",
-            show_details: "Показать детали ▾", hide_details: "Скрыть детали ▴", alert_cancel_confirm: "Вы действительно хотите отменить этот запрос и разблокировать клети?",
-            tab_audit: "📝 Аудит", tab_stats: "📊 Статистика", tab_data: "📂 Данные", tab_settings: "⚙️ Сотрудники", select_worker: "Выберите сотрудника:", done_cages: "Выполненные клети:", btn_generate: "Сгенерировать выборку", cages_to_test: "🔍 Клети для проверки:", click_error: "Отметьте обнаруженные ошибки:", btn_save_audit: "💾 Сохранить результат проверки", stats_title: "Статистика (Текущий месяц) 🏆", stats_formula: "Уровень брака = (Ошибки / Выполненные клети) × 100", btn_close_month: "📅 Закрыть месяц", th_name: "Сотрудник", th_cages: "Всего клетей", th_shifts: "Смены (дни)", th_avg: "В ср. за день", th_errors: "Ошибок", th_error_rate: "Брак (%)", th_risk: "Текущий Риск", data_title: "Архив и Глобальные данные 🗂️", subtab_history: "📅 История по месяцам", subtab_alltime: "🌍 Общая статистика", history_desc: "Здесь сохраняется статистика после закрытия каждого месяца.", alltime_desc: "Сумма всех клетей и ошибок за всё время работы.", th_cages_all: "Клети (All-time)", th_shifts_all: "Всего смен", th_errors_all: "Ошибки (All-time)", th_error_rate_all: "Брак (All-time)", settings_title: "Управление сотрудниками", placeholder_name: "Имя и Фамилия", btn_add_worker: "Добавить в облако", th_risk_set: "Установленный Риск", th_action: "Действие", alert_no_worker: "Пожалуйста, выберите сотрудника.", alert_no_cage: "Пожалуйста, выберите хотя бы одну клеть.", alert_no_count: "Пожалуйста, укажите количество для категории:", alert_saved_err: "Сохранено. Обнаружено ошибок: %err% (Сотрудник: %name%).", alert_saved_ok: "Сохранено. Ошибок не обнаружено (Сотрудник: %name%).", alert_add_ok: "Сотрудник успешно добавлен.", alert_del_confirm: "Вы действительно хотите удалить сотрудника: %name%?", alert_month_confirm: "Вы действительно хотите закрыть месяц?\nДанные будут сохранены в архив, уровни риска обновлены, а статистика обнулена.", alert_month_ok: "Месяц успешно закрыт.", lbl_error: "Ошибка", lbl_count: "Введите количество:", placeholder_count: "Например, 2", lbl_empty_db: "-- Добавьте сотрудников в настройках --", lbl_empty_history: "Данные пока отсутствуют.", stat_done: "Всего выполнено:", stat_risk: "Уровень риска:", stat_test: "К проверке:", dbl_click_hint: "💡 Двойной клик по строке откроет график профиля сотрудника.", profile_title: "Профиль сотрудника: %name%", btn_toggle_global: "Показать среднее по складу", current_month: "Текущий", chart_avg_cages: "В ср. клетей (Сотрудник)", chart_err_rate: "Брак (Сотрудник) %", chart_global_avg: "В ср. клетей (Склад)", chart_global_err: "Брак (Склад) %", done_blocked: "(Уже обработано)"
+            auth_title: "Выберите роль доступа", role_tl: "Руководитель (TL)", role_emp: "Сотрудник", btn_back: "Назад", btn_logout: "Выйти из системы",
+            login_title: "Авторизация", btn_enter: "Войти", login_err: "Указаны неверные учетные данные.",
+            emp_select_name: "Выберите ваш профиль:", emp_cages: "Укажите выполненные задачи:", emp_cages_info: "Примечание: Серые элементы уже были обработаны в текущем цикле.", emp_submit: "Отправить на проверку", emp_success: "Данные успешно переданы на проверку.", emp_confirm_submit: "Вы подтверждаете отправку данных для проведения аудита?",
+            audit_mode_auto: "Очередь запросов", audit_mode_manual: "Ручной ввод", reset_kpi: "Сбросить цикл KPI", reset_kpi_confirm: "Вы подтверждаете очистку текущего пула задач для начала нового цикла?", queue_empty: "Ожидающих проверок в системе нет.", btn_check: "Начать проверку", btn_cancel: "Отклонить запрос", cages_count: "Заявленный объем: %count%",
+            show_details: "Показать детали ▾", hide_details: "Скрыть детали ▴", alert_cancel_confirm: "Подтверждаете ли Вы отмену данного запроса? Выбранные позиции будут возвращены в общий пул.",
+            tab_audit: "Аудит", tab_stats: "Статистика", tab_data: "Архив", tab_settings: "Персонал", select_worker: "Выберите сотрудника для проверки:", done_cages: "Выполненный объем для оценки:", btn_generate: "Сформировать контрольную выборку", cages_to_test: "Позиции, отобранные для физической проверки:", click_error: "Зафиксируйте выявленные несоответствия:", btn_save_audit: "Сохранить результаты аудита", stats_title: "Ежемесячные показатели эффективности", stats_formula: "Расчет доли брака: (Ошибки / Общий объем) × 100", btn_close_month: "Закрыть отчетный период", th_name: "Сотрудник", th_cages: "Общий объем", th_shifts: "Рабочие дни", th_avg: "В ср. за день", th_errors: "Кол-во ошибок", th_error_rate: "Доля брака (%)", th_risk: "Профиль риска", data_title: "Системный архив данных", subtab_history: "Ежемесячные отчеты", subtab_alltime: "Глобальная статистика", history_desc: "Архив показателей эффективности по отчетным периодам.", alltime_desc: "Агрегированные данные за весь период работы сотрудника.", th_cages_all: "Объем (весь период)", th_shifts_all: "Дни (весь период)", th_errors_all: "Ошибки (весь период)", th_error_rate_all: "Общая доля брака", settings_title: "Управление персоналом", placeholder_name: "ФИО сотрудника", btn_add_worker: "Зарегистрировать", th_risk_set: "Назначенный риск", th_action: "Действия", alert_no_worker: "Пожалуйста, выберите профиль сотрудника.", alert_no_cage: "Пожалуйста, выберите хотя бы одну позицию для анализа.", alert_no_count: "Необходимо указать точное количество для категории:", alert_saved_err: "Запись сохранена. За сотрудником %name% зафиксировано несоответствий: %err%.", alert_saved_ok: "Запись сохранена. Проверка сотрудника %name% прошла без замечаний.", alert_add_ok: "Профиль сотрудника успешно создан.", alert_del_confirm: "Вы подтверждаете безвозвратное удаление профиля: %name%?", alert_month_confirm: "Подтверждаете закрытие отчетного периода?\nДанные будут перенесены в архив, текущие метрики обнулены, а уровни риска пересмотрены.", alert_month_ok: "Данные отчетного периода успешно обработаны и сохранены.", lbl_error: "Зафиксировать ошибку", lbl_count: "Укажите количество:", placeholder_count: "Например, 2", lbl_empty_db: "-- База данных пуста --", lbl_empty_history: "Архивные записи на данный момент отсутствуют.", stat_done: "Заявленный объем:", stat_risk: "Оценка риска:", stat_test: "Отобрано для аудита:", dbl_click_hint: "Примечание: Двойной клик по строке таблицы открывает детальный аналитический график.", profile_title: "Аналитический профиль: %name%", btn_toggle_global: "Показать средние показатели предприятия", current_month: "Текущий", chart_avg_cages: "Производительность (Сотрудник)", chart_err_rate: "Доля брака (Сотрудник) %", chart_global_avg: "Производительность (В среднем)", chart_global_err: "Доля брака (В среднем) %", done_blocked: "(Уже обработано)"
         },
         he: {
-            auth_title: "בחר תפקיד", role_tl: "ראש צוות", role_emp: "עובד", btn_back: "🔙 חזור", btn_logout: "🚪 התנתק",
-            login_title: "כניסה למערכת (TL)", btn_enter: "היכנס", login_err: "שם משתמש או סיסמה שגויים.",
-            emp_select_name: "אנא בחר את שמך:", emp_cages: "בחר כלובים שהושלמו:", emp_cages_info: "כלובים אפורים כבר עובדו במחזור הנוכחי.", emp_submit: "סיים ושלח", emp_success: "נשלח בהצלחה לבדיקה.", emp_confirm_submit: "האם אתה בטוח שברצונך לשלוח בדיקה זו?",
-            audit_mode_auto: "אוטומטי (תור)", audit_mode_manual: "ידני", reset_kpi: "🔄 איפוס מחזור של יומיים (KPI)", reset_kpi_confirm: "האם ברצונך לנקות את הכלובים שהושלמו עבור מחזור חדש?", queue_empty: "אין בדיקות ממתינות.", btn_check: "בצע בדיקה", btn_cancel: "בטל", cages_count: "מספר כלובים: %count%",
-            show_details: "הצג פרטים ▾", hide_details: "הסתר פרטים ▴", alert_cancel_confirm: "האם אתה בטוח שברצונך לבטל לבטלה ולשחרר את הכלובים?",
-            tab_audit: "📝 ביקורת", tab_stats: "📊 סטטיסטיקה", tab_data: "📂 נתונים", tab_settings: "⚙️ ניהול עובדים", select_worker: "בחר עובד:", done_cages: "כלובים שהושלמו:", btn_generate: "צור מדגם", cages_to_test: "🔍 כלובים לבדיקה:", click_error: "סמן שגיאות במידה ונמצאו:", btn_save_audit: "💾 שמור תוצאות בדיקה", stats_title: "סטטיסטיקת עובדים (חודש נוכחי) 🏆", stats_formula: "אחוז שגיאות = (שגיאות / סך הכלובים) × 100", btn_close_month: "📅 סגור חודש", th_name: "שם העובד", th_cages: "סך הכלובים", th_shifts: "משמרות (ימים)", th_avg: "ממוצע / יום", th_errors: "מספר שגיאות", th_error_rate: "אחוז שגיאות (%)", th_risk: "רמת סיכון נוכחית", data_title: "ארכיון ונתונים גלובליים 🗂️", subtab_history: "📅 היסטוריה חודשית", subtab_alltime: "🌍 סטטיסטיקה כוללת", history_desc: "נתונים נשמרים כאן לאחר סגירת כל חודש.", alltime_desc: "סיכום של כל הכלובים והשגיאות לכל תקופת ההעסקה.", th_cages_all: "כלובים (כל הזמנים)", th_shifts_all: "סך משמרות", th_errors_all: "שגיאות (כל הזמנים)", th_error_rate_all: "אחוז שגיאות (כל הזמנים)", settings_title: "ניהול עובדים", placeholder_name: "שם מלא", btn_add_worker: "הוסף למערכת", th_risk_set: "סיכון מוגדר", th_action: "פעולה", alert_no_worker: "אנא בחר עובד מהרשימה.", alert_no_cage: "אנא בחר לפחות כלוב אחד.", alert_no_count: "אנא הזן כמות עבור קטגוריה:", alert_saved_err: "נשמר. נמצאו %err% שגיאות (עובד: %name%).", alert_saved_ok: "נשמר. הבדיקה עברה בהצלחה (0 שגיאות) (עובד: %name%).", alert_add_ok: "העובד נוסף בהצלחה למערכת.", alert_del_confirm: "האם אתה בטוח שברצונך למחוק את העובד: %name%?", alert_month_confirm: "האם אתה בטוח שברצונך לסגור את החודש?\nהנתונים יישמרו לארכיון, הסיכונים יעודכנו, והסטטיסטיקה תאופס.", alert_month_ok: "החודש נסגר בהצלחה.", lbl_error: "שגיאה", lbl_count: "הזן כמות:", placeholder_count: "לדוגמה 2", lbl_empty_db: "-- הוסף עובדים בהגדרות --", lbl_empty_history: "אין נתונים עדיין.", stat_done: "סך הכל הושלם:", stat_risk: "רמת סיכון:", stat_test: "לבדיקה:", dbl_click_hint: "💡 לחץ פעמיים על שורה כדי לפתוח את פרופיל העובד.", profile_title: "פרופיל עובד: %name%", btn_toggle_global: "הצג ממוצע מחסן", current_month: "נוכחי", chart_avg_cages: "ממוצע כלובים (עובד)", chart_err_rate: "אחוז שגיאות (עובד)", chart_global_avg: "ממוצע כלובים (מחסן)", chart_global_err: "אחוז שגיאות (מחסן)", done_blocked: "(עובד במחזור זה)"
+            auth_title: "בחר תפקיד גישה", role_tl: "מנהל צוות (TL)", role_emp: "עובד", btn_back: "חזור", btn_logout: "התנתק מהמערכת",
+            login_title: "אימות מערכת", btn_enter: "היכנס", login_err: "פרטי התחברות שגויים.",
+            emp_select_name: "אנא בחר את הפרופיל שלך:", emp_cages: "סמן משימות שהושלמו:", emp_cages_info: "הערה: פריטים באפור כבר עובדו במחזור הנוכחי.", emp_submit: "שלח לאימות", emp_success: "הנתונים נשלחו בהצלחה לבדיקה.", emp_confirm_submit: "האם ברצונך לאשר שליחת נתונים אלו לביקורת?",
+            audit_mode_auto: "אוטומטי (תור בקשות)", audit_mode_manual: "הזנה ידנית", reset_kpi: "איפוס מחזור KPI", reset_kpi_confirm: "האם לאשר ניקוי של מחזור המשימות הפעיל לקראת תקופת הערכה חדשה?", queue_empty: "אין בקשות אימות ממתינות.", btn_check: "התחל ביקורת", btn_cancel: "דחה בקשה", cages_count: "פריטים שדווחו: %count%",
+            show_details: "הצג פרטים ▾", hide_details: "הסתר פרטים ▴", alert_cancel_confirm: "האם לאשר דחיית בקשה זו? הפריטים הרלוונטיים יוחזרו למאגר המערכת.",
+            tab_audit: "ביקורת", tab_stats: "סטטיסטיקה", tab_data: "ארכיון", tab_settings: "כוח אדם", select_worker: "בחר עובד לביקורת:", done_cages: "פריטים להערכה:", btn_generate: "הפק מדגם ביקורת", cages_to_test: "פריטים שנבחרו לבדיקה פיזית:", click_error: "סמן חריגות שאומתו:", btn_save_audit: "שמור תוצאות ביקורת", stats_title: "מדדי ביצועים חודשיים", stats_formula: "חישוב שיעור שגיאות: (שגיאות / סך הכל) × 100", btn_close_month: "סגור חודש פיננסי", th_name: "עובד", th_cages: "נפח כולל", th_shifts: "ימים פעילים", th_avg: "ממוצע יומי", th_errors: "חריגות", th_error_rate: "שיעור שגיאות (%)", th_risk: "פרופיל סיכון", data_title: "ארכיון נתוני מערכת", subtab_history: "דוחות חודשיים", subtab_alltime: "סטטיסטיקה גלובלית", history_desc: "רשומות ביצועים מקובצות לפי תקופות דיווח.", alltime_desc: "נתונים מצטברים לכל תקופת ההעסקה הרשומה.", th_cages_all: "נפח (כל הזמנים)", th_shifts_all: "ימים (כל הזמנים)", th_errors_all: "שגיאות (כל הזמנים)", th_error_rate_all: "שיעור שגיאות כולל", settings_title: "ניהול כוח אדם", placeholder_name: "שם מלא", btn_add_worker: "רשום עובד", th_risk_set: "סיכון מוקצה", th_action: "ניהול", alert_no_worker: "אנא ציין פרופיל עובד.", alert_no_cage: "אנא בחר לפחות פריט אחד לניתוח.", alert_no_count: "אנא ספק כמות מדויקת לקטגוריה:", alert_saved_err: "רשומה נשמרה. לעובד %name% נרשמו %err% חריגות.", alert_saved_ok: "רשומה נשמרה. הביקורת עבור %name% הסתיימה ללא חריגות.", alert_add_ok: "פרופיל העובד נוצר בהצלחה.", alert_del_confirm: "האם למחוק באופן בלתי הפיך את הפרופיל: %name%?", alert_month_confirm: "לאשר סגירת חודש?\nהנתונים יועברו לארכיון, מדדים תפעוליים יאופסו, ופרופילי סיכון יחושבו מחדש.", alert_month_ok: "הנתונים החודשיים עובדו ונשמרו בארכיון בהצלחה.", lbl_error: "רישום חריגה", lbl_count: "ציין כמות:", placeholder_count: "למשל 2", lbl_empty_db: "-- מסד הנתונים ריק --", lbl_empty_history: "אין רשומות היסטוריות זמינות.", stat_done: "נפח כולל:", stat_risk: "סיכון מוערך:", stat_test: "נבחר לביקורת:", dbl_click_hint: "הערה: לחיצה כפולה על שורה תציג תרשימים אנליטיים מפורטים.", profile_title: "פרופיל אנליטי: %name%", btn_toggle_global: "הצג ממוצעי מתקן", current_month: "נוכחי", chart_avg_cages: "תפוקה (עובד)", chart_err_rate: "שיעור שגיאות (עובד) %", chart_global_avg: "תפוקה (ממוצע מתקן)", chart_global_err: "שיעור שגיאות (ממוצע מתקן) %", done_blocked: "(כבר עובד)"
         }
     };
 
+    // --- STRUCTURE ---
     const cageCategories = [
         { id: "vyziva", type: "standard", names: { cs: "Dětská výživa", en: "Baby food", ru: "Детское питание", he: "מזון לתינוקות" } },
         { id: "slehacky", type: "standard", names: { cs: "Šlehačky a ledové kávy", en: "Whipped creams & Iced coffees", ru: "Сливки и айс-кофе", he: "קצפות וקפה קר" } },
@@ -361,7 +443,7 @@
         { id: "kavy", type: "number", names: { cs: "Kávy", en: "Coffees", ru: "Кофе", he: "קפה" } },
         { id: "bio", type: "standard", names: { cs: "BIO výrobky", en: "BIO products", ru: "БИО продукты", he: "מוצרי ביו" } },
         { id: "mezinarodni", type: "standard", names: { cs: "Mezinárodní zboží", en: "International goods", ru: "Международные товары", he: "מוצרים בינלאומיים" } },
-        { id: "oleje", type: "standard", names: { cs: "Oleje", en: "Oils", ru: "Масла", he: "שمנים" } },
+        { id: "oleje", type: "standard", names: { cs: "Oleje", en: "Oils", ru: "Масла", he: "שמנים" } },
         { id: "bramburky", type: "standard", names: { cs: "Brambůrky", en: "Chips", ru: "Чипсы", he: "חטיפים/צ'יפס" } }
     ];
 
@@ -421,24 +503,12 @@
     function setupCustomLangDropdown() {
         const langCurrent = document.getElementById("lang-current");
         const langList = document.getElementById("lang-list");
-
         if (langCurrent && langList) {
-            langCurrent.addEventListener("click", function(e) {
-                e.stopPropagation();
-                langList.classList.toggle("select-show");
-            });
-
+            langCurrent.addEventListener("click", function(e) { e.stopPropagation(); langList.classList.toggle("select-show"); });
             langList.querySelectorAll("div").forEach(item => {
-                item.addEventListener("click", function() {
-                    langCurrent.innerHTML = this.innerHTML;
-                    langList.classList.remove("select-show");
-                    changeLanguage(this.getAttribute("data-val"));
-                });
+                item.addEventListener("click", function() { langCurrent.innerHTML = this.innerHTML; langList.classList.remove("select-show"); changeLanguage(this.getAttribute("data-val")); });
             });
-
-            document.addEventListener("click", function() {
-                langList.classList.remove("select-show");
-            });
+            document.addEventListener("click", function() { langList.classList.remove("select-show"); });
         }
     }
 
@@ -451,10 +521,8 @@
 
     function doLogin() {
         const u = document.getElementById('login-user').value; const p = document.getElementById('login-pass').value;
-        if(u === 'Albert' && p === '123') {
-            document.getElementById('login-user').value = ''; document.getElementById('login-pass').value = '';
-            showScreen('screen-tl-dash');
-        } else alert(t('login_err'));
+        if(u === 'Albert' && p === '123') { document.getElementById('login-user').value = ''; document.getElementById('login-pass').value = ''; showScreen('screen-tl-dash'); } 
+        else alert(t('login_err'));
     }
 
     function switchTab(tab) {
@@ -575,13 +643,8 @@
     // --- TL AUDIT LOGIC ---
     function toggleDetails(id, elem) {
         let ul = document.getElementById('details-' + id);
-        if(ul.style.display === 'none') {
-            ul.style.display = 'block';
-            elem.innerText = t('hide_details');
-        } else {
-            ul.style.display = 'none';
-            elem.innerText = t('show_details');
-        }
+        if(ul.style.display === 'none') { ul.style.display = 'block'; elem.innerText = t('hide_details'); } 
+        else { ul.style.display = 'none'; elem.innerText = t('show_details'); }
     }
 
     function renderQueue() {
@@ -590,12 +653,11 @@
             hasItems = true; let item = pendingAudits[key]; let w = workers.find(x => x.id === item.workerId);
             let wName = w ? w.name : "Neznámý";
             
-            let totalPhysical = 0;
-            let detailsHtml = '';
+            let totalPhysical = 0; let detailsHtml = '';
             if(item.cages) {
                 item.cages.forEach(c => { 
                     totalPhysical += c.isNumber ? c.count : 1; 
-                    detailsHtml += `<li>${c.displayBase} ${c.isNumber ? `(x${c.count})` : ''}</li>`;
+                    detailsHtml += `<li><svg class="svg-icon" style="width:14px; height:14px; margin-right:5px; color:var(--primary);"><use href="#icon-check"></use></svg>${c.displayBase} ${c.isNumber ? `(x${c.count})` : ''}</li>`;
                 });
             }
 
@@ -604,13 +666,13 @@
                 <div class="queue-header">
                     <div><h4>${wName}</h4><p>${t('cages_count').replace('%count%', totalPhysical)}</p></div>
                     <div style="display:flex; gap:10px;">
-                        <button class="btn" onclick="startAutoAudit('${key}')">${t('btn_check')}</button>
-                        <button class="btn btn-secondary" style="background:var(--high);" onclick="cancelPendingAudit('${key}')">${t('btn_cancel')}</button>
+                        <button class="btn" onclick="startAutoAudit('${key}')"><svg class="svg-icon"><use href="#icon-search"></use></svg> ${t('btn_check')}</button>
+                        <button class="btn btn-secondary" style="background:var(--high);" onclick="cancelPendingAudit('${key}')"><svg class="svg-icon"><use href="#icon-close"></use></svg> ${t('btn_cancel')}</button>
                     </div>
                 </div>
                 <div style="margin-top: 15px; width: 100%;">
                     <span style="color: var(--primary); cursor: pointer; font-size: 14px;" onclick="toggleDetails('${key}', this)">${t('show_details')}</span>
-                    <ul id="details-${key}" style="display: none; margin-top: 10px; padding-left: 20px; font-size: 15px; color: var(--text-muted); margin-bottom: 0;">
+                    <ul id="details-${key}" style="display: none; margin-top: 10px; padding-left: 0; list-style: none; font-size: 15px; color: var(--text-muted); margin-bottom: 0;">
                         ${detailsHtml}
                     </ul>
                 </div>
@@ -661,7 +723,7 @@
         const shuffled = samplePool.sort(() => 0.5 - Math.random()); const selectedSample = shuffled.slice(0, sampleSize);
 
         const resBox = document.getElementById('result-box'); const list = document.getElementById('sample-list'); list.innerHTML = '';
-        selectedSample.forEach(item => { list.innerHTML += `<li class="audit-item"><span>📍 ${item.display}</span><label><input type="checkbox" class="error-checkbox"> ${t('lbl_error')}</label></li>`; });
+        selectedSample.forEach(item => { list.innerHTML += `<li class="audit-item"><span><svg class="svg-icon" style="color:var(--text-main);"><use href="#icon-box"></use></svg> ${item.display}</span><label><input type="checkbox" class="error-checkbox"> ${t('lbl_error')}</label></li>`; });
         document.getElementById('sample-stats').innerHTML = `${t('stat_done')} <strong>${samplePool.length}</strong> | ${t('stat_risk')} <strong>${worker.risk.toUpperCase()}</strong> | ${t('stat_test')} <strong>${sampleSize}</strong>`;
         resBox.style.display = 'block'; resBox.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
@@ -686,9 +748,7 @@
         currentAuditCagesCount = 0;
     }
 
-    function resetKPICycle() {
-        if(confirm(t('reset_kpi_confirm'))) { db.ref('completedCages').remove(); }
-    }
+    function resetKPICycle() { if(confirm(t('reset_kpi_confirm'))) { db.ref('completedCages').remove(); } }
 
     // --- SETTINGS ---
     function addWorker() {
@@ -733,10 +793,9 @@
         workers.forEach(x => { sumCagesCurr += (x.totalCages || 0); sumShiftsCurr += (x.shifts || 0); sumErrorsCurr += (x.errors || 0); });
         
         let currW = workers.find(x => x.id === workerId);
-        if(currW) {
-            workerName = currW.name; wCages.push(currW.shifts > 0 ? (currW.totalCages / currW.shifts) : 0); wErrors.push(currW.totalCages > 0 ? (currW.errors / currW.totalCages * 100) : 0);
+        if(currW) { workerName = currW.name; wCages.push(currW.shifts > 0 ? (currW.totalCages / currW.shifts) : 0); wErrors.push(currW.totalCages > 0 ? (currW.errors / currW.totalCages * 100) : 0);
         } else { wCages.push(0); wErrors.push(0); }
-        gCages.push(sumShiftsCurr > 0 ? (sumCagesCurr / sumShiftsCurr) : 0); gErrors.push(sumShiftsCurr > 0 ? (sumErrorsCurr / sumCagesCurr * 100) : 0);
+        gCages.push(sumShiftsCurr > 0 ? (sumCagesCurr / sumShiftsCurr) : 0); gErrors.push(sumCagesCurr > 0 ? (sumErrorsCurr / sumCagesCurr * 100) : 0);
 
         document.getElementById('profile-title').innerText = t('profile_title').replace('%name%', workerName);
         isGlobalStatsVisible = false; 
@@ -750,8 +809,7 @@
         if (profileChartInstance) profileChartInstance.destroy();
         const ctx = document.getElementById('profileChart').getContext('2d');
         profileChartInstance = new Chart(ctx, {
-            type: 'line',
-            data: { labels: labels, datasets: [
+            type: 'line', data: { labels: labels, datasets: [
                 { label: t('chart_avg_cages'), data: wCages, borderColor: '#34C759', backgroundColor: 'rgba(52,199,89,0.1)', yAxisID: 'y1', tension: 0.3, fill: true, borderWidth: 3 },
                 { label: t('chart_err_rate'), data: wErrors, borderColor: '#FF3B30', backgroundColor: 'transparent', yAxisID: 'y2', tension: 0.3, borderWidth: 3 },
                 { label: t('chart_global_avg'), data: gCages, borderColor: '#007AFF', borderDash: [5, 5], backgroundColor: 'transparent', yAxisID: 'y1', tension: 0.3, hidden: !isGlobalStatsVisible },
@@ -774,7 +832,7 @@
         let rankedWorkers = workers.map(w => { return { ...w, errorRate: w.totalCages > 0 ? (w.errors / w.totalCages) * 100 : 0 }; }).sort((a, b) => a.errorRate - b.errorRate);
         rankedWorkers.forEach(w => {
             let errColor = w.errors > 0 ? 'var(--high)' : 'inherit'; let shifts = w.shifts || 0; let avg = shifts > 0 ? (w.totalCages / shifts).toFixed(1) : "0.0";
-            tbody.innerHTML += `<tr class="clickable" ondblclick="openProfile('${w.id}')"><td><strong>${w.name}</strong></td><td>📦 ${w.totalCages || 0}</td><td>${shifts}</td><td><strong>${avg}</strong></td><td style="color: ${errColor}; font-weight: 600;">${w.errors || 0}</td><td>${w.errorRate.toFixed(1)}%</td><td><span class="badge ${w.risk}">${w.risk.toUpperCase()}</span></td></tr>`;
+            tbody.innerHTML += `<tr class="clickable" ondblclick="openProfile('${w.id}')"><td><strong>${w.name}</strong></td><td><svg class="svg-icon"><use href="#icon-box"></use></svg> ${w.totalCages || 0}</td><td>${shifts}</td><td><strong>${avg}</strong></td><td style="color: ${errColor}; font-weight: 600;">${w.errors || 0}</td><td>${w.errorRate.toFixed(1)}%</td><td><span class="badge ${w.risk}">${w.risk.toUpperCase()}</span></td></tr>`;
         });
     }
 
@@ -783,7 +841,7 @@
         let allTimeRanked = workers.map(w => { return { ...w, allTimeErrorRate: w.allTimeCages > 0 ? (w.allTimeErrors / w.allTimeCages) * 100 : 0 }; }).sort((a, b) => a.allTimeErrorRate - b.allTimeErrorRate); 
         allTimeRanked.forEach(w => {
             let errColor = w.allTimeErrors > 0 ? 'var(--high)' : 'inherit'; let shiftsAll = w.allTimeShifts || 0; let avgAll = shiftsAll > 0 ? (w.allTimeCages / shiftsAll).toFixed(1) : "0.0";
-            tbody.innerHTML += `<tr class="clickable" ondblclick="openProfile('${w.id}')"><td><strong>${w.name}</strong></td><td>📦 ${w.allTimeCages || 0}</td><td>${shiftsAll}</td><td><strong>${avgAll}</strong></td><td style="color: ${errColor}; font-weight: 600;">${w.allTimeErrors || 0}</td><td><strong>${w.allTimeErrorRate.toFixed(1)}%</strong></td></tr>`;
+            tbody.innerHTML += `<tr class="clickable" ondblclick="openProfile('${w.id}')"><td><strong>${w.name}</strong></td><td><svg class="svg-icon"><use href="#icon-box"></use></svg> ${w.allTimeCages || 0}</td><td>${shiftsAll}</td><td><strong>${avgAll}</strong></td><td style="color: ${errColor}; font-weight: 600;">${w.allTimeErrors || 0}</td><td><strong>${w.allTimeErrorRate.toFixed(1)}%</strong></td></tr>`;
         });
     }
 
@@ -791,22 +849,22 @@
         const container = document.getElementById('history-container'); container.innerHTML = '';
         if (historyData.length === 0) { container.innerHTML = `<p style="color: var(--text-muted); font-size: 16px;">${t('lbl_empty_history')}</p>`; return; }
         historyData.forEach(record => {
-            let html = `<div class="history-card"><div class="history-header">📅 ${record.month}</div><table class="stats-table"><thead><tr><th>${t('th_name')}</th><th>${t('th_cages')}</th><th>${t('th_shifts')}</th><th>${t('th_avg')}</th><th>${t('th_errors')}</th><th>${t('th_error_rate')}</th><th>${t('th_risk')}</th></tr></thead><tbody>`;
+            let html = `<div class="history-card"><div class="history-header"><svg class="svg-icon"><use href="#icon-calendar"></use></svg> ${record.month}</div><div class="table-responsive"><table class="stats-table"><thead><tr><th>${t('th_name')}</th><th>${t('th_cages')}</th><th>${t('th_shifts')}</th><th>${t('th_avg')}</th><th>${t('th_errors')}</th><th>${t('th_error_rate')}</th><th>${t('th_risk')}</th></tr></thead><tbody>`;
             let sortedWorkers = (record.workers || []).map(w => { w.errorRate = w.totalCages > 0 ? (w.errors / w.totalCages) * 100 : 0; return w; }).sort((a, b) => a.errorRate - b.errorRate);
             sortedWorkers.forEach(w => {
                 let errColor = w.errors > 0 ? 'var(--high)' : 'inherit'; let shifts = w.shifts || 0; let avg = shifts > 0 ? (w.totalCages / shifts).toFixed(1) : "0.0";
-                html += `<tr class="clickable" ondblclick="openProfile('${w.id}')"><td><strong>${w.name}</strong></td><td>📦 ${w.totalCages || 0}</td><td>${shifts}</td><td><strong>${avg}</strong></td><td style="color: ${errColor}; font-weight: 600;">${w.errors || 0}</td><td>${w.errorRate.toFixed(1)}%</td><td><span class="badge ${w.risk}">${w.risk.toUpperCase()}</span></td></tr>`;
+                html += `<tr class="clickable" ondblclick="openProfile('${w.id}')"><td><strong>${w.name}</strong></td><td><svg class="svg-icon"><use href="#icon-box"></use></svg> ${w.totalCages || 0}</td><td>${shifts}</td><td><strong>${avg}</strong></td><td style="color: ${errColor}; font-weight: 600;">${w.errors || 0}</td><td>${w.errorRate.toFixed(1)}%</td><td><span class="badge ${w.risk}">${w.risk.toUpperCase()}</span></td></tr>`;
             });
-            html += `</tbody></table></div>`; container.innerHTML += html;
+            html += `</tbody></table></div></div>`; container.innerHTML += html;
         });
     }
 
     function renderAdminWorkers() {
         const tbody = document.getElementById('admin-worker-list'); tbody.innerHTML = '';
-        workers.forEach(w => { tbody.innerHTML += `<tr class="clickable" ondblclick="openProfile('${w.id}')"><td><strong>${w.name}</strong></td><td><span class="badge ${w.risk}">${w.risk.toUpperCase()}</span></td><td style="text-align: right;"><button class="btn-delete" onclick="removeWorker('${w.id}', '${w.name}')" title="Smazat">🗑️</button></td></tr>`; });
+        workers.forEach(w => { tbody.innerHTML += `<tr><td><strong>${w.name}</strong></td><td><span class="badge ${w.risk}">${w.risk.toUpperCase()}</span></td><td style="text-align: right;"><button class="btn-icon" onclick="removeWorker('${w.id}', '${w.name}')"><svg class="svg-icon"><use href="#icon-trash"></use></svg></button></td></tr>`; });
     }
 
-    init();
+    window.onload = init;
 </script>
 </body>
 </html>
