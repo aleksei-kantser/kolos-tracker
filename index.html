@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kološ Tracker - Enterprise Pro</title>
     
+    <!-- Firebase & Chart.js -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -22,9 +23,15 @@
         .header-top h1 { font-size: 28px; font-weight: 700; margin: 0; color: var(--text-main); display: flex; align-items: center; gap: 12px;}
         h2 { font-size: 20px; font-weight: 600; margin-top: 0; display: flex; align-items: center; gap: 10px;}
         
-        /* High Quality Emojis */
+        /* High Quality Emojis / Vectors */
         .emoji-icon { width: 22px; height: 22px; object-fit: contain; vertical-align: middle; flex-shrink: 0; }
+        .svg-icon { width: 20px; height: 20px; fill: currentColor; flex-shrink: 0; }
         .flag-icon { width: 22px; height: 15px; border-radius: 2px; object-fit: cover; border: 1px solid rgba(0,0,0,0.1); }
+
+        .icon-primary { fill: var(--primary); }
+        .icon-success { fill: var(--low); }
+        .icon-danger { fill: var(--high); }
+        .icon-warning { fill: var(--medium); }
 
         /* Custom Language Switcher */
         .custom-lang-switcher { position: relative; display: inline-block; width: 160px; font-size: 15px; font-weight: 600; }
@@ -63,7 +70,7 @@
         .badge.high { background-color: var(--high); }
 
         .cages-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; margin-top: 15px; }
-        .cage-item { background: var(--bg-color); padding: 20px; border-radius: 14px; display: flex; align-items: center; cursor: pointer; font-size: 15px; font-weight: 500; transition: all 0.2s ease; border: 1px solid var(--border); }
+        .cage-item { background: var(--bg-color); padding: 18px; border-radius: 14px; display: flex; align-items: center; cursor: pointer; font-size: 15px; font-weight: 500; transition: all 0.2s ease; border: 1px solid var(--border); }
         .cage-item:hover { background: #E5E5EA; }
         .cage-item:has(input:checked) { background: rgba(0, 122, 255, 0.05); border: 1px solid var(--primary); color: var(--primary); }
         .cage-item input { margin-right: 14px; width: 20px; height: 20px; accent-color: var(--primary); cursor: pointer; }
@@ -74,6 +81,10 @@
         .btn-success { background-color: var(--low); width: 100%; margin-bottom: 12px; }
         .btn-danger { background-color: var(--high); width: 100%; }
         .btn-secondary { background-color: var(--text-main); }
+        .btn-outline { background: transparent; color: var(--text-main); border: 1px solid var(--border); }
+        .btn-outline:hover { background: var(--bg-color); }
+        .btn-dark { background: #1C1C1E; color: #FFF; }
+        .btn-dark:hover { background: #000; }
 
         #result-box { display: none; margin-top: 24px; padding: 24px; background: #F2F9FF; border: 1px solid #D0E8FF; border-radius: 14px; }
         #result-box h3 { margin-top: 0; color: var(--primary); font-size: 18px;}
@@ -95,7 +106,7 @@
         .header-flex { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
         .admin-row { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; align-items: flex-end; }
         .admin-row input, .admin-row select { flex: 1; min-width: 180px; }
-        .btn-icon { background: transparent; border: none; font-size: 18px; cursor: pointer; transition: opacity 0.2s; padding: 6px; }
+        .btn-icon { background: transparent; border: none; font-size: 18px; cursor: pointer; transition: opacity 0.2s; padding: 6px; display: inline-flex; align-items: center; justify-content: center;}
         .btn-icon:hover { opacity: 0.7; }
 
         .history-card { border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 24px; }
@@ -122,13 +133,24 @@
         .close-btn:hover { color: var(--high); }
         .chart-container { position: relative; height: 40vh; width: 100%; margin-top: 20px; }
 
+        /* Kebab Menu (3 dots) */
+        .kebab-menu { position: relative; display: inline-block; }
+        .kebab-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-muted); padding: 0 10px; line-height: 1;}
+        .kebab-btn:hover { color: var(--text-main); }
+        .kebab-content { display: none; position: absolute; right: 0; top: 100%; background: var(--card-bg); min-width: 180px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-radius: 8px; border: 1px solid var(--border); z-index: 10; overflow: hidden;}
+        .kebab-content a { padding: 12px 16px; display: flex; align-items: center; text-decoration: none; color: var(--text-main); font-size: 14px; font-weight: 500; cursor: pointer; border-bottom: 1px solid var(--border);}
+        .kebab-content a:last-child { border-bottom: none; }
+        .kebab-content a:hover { background: var(--bg-color); }
+        .kebab-menu:hover .kebab-content { display: block; }
+
         /* RTL Specific Adjustments */
         [dir="rtl"] .cage-item input { margin-right: 0; margin-left: 14px; }
         [dir="rtl"] .expand-box label input[type="checkbox"] { margin-right: 0; margin-left: 12px; }
         [dir="rtl"] .audit-item input[type="checkbox"] { margin-right: 0; margin-left: 12px; }
         [dir="rtl"] .stats-table th, [dir="rtl"] .stats-table td { text-align: right; }
         [dir="rtl"] .close-btn { right: auto; left: 20px; }
-        [dir="rtl"] .role-btn .emoji-icon, [dir="rtl"] .tabs button .emoji-icon, [dir="rtl"] .history-header .emoji-icon, [dir="rtl"] .btn-toggle-global .emoji-icon, [dir="rtl"] .btn .emoji-icon { margin-right: 0; margin-left: 8px; }
+        [dir="rtl"] .role-btn .emoji-icon, [dir="rtl"] .tabs button .svg-icon, [dir="rtl"] .history-header .svg-icon, [dir="rtl"] .btn-toggle-global .svg-icon, [dir="rtl"] .btn .svg-icon { margin-right: 0; margin-left: 8px; }
+        [dir="rtl"] .kebab-content { left: 0; right: auto; }
 
         /* Mobile Responsiveness */
         @media (max-width: 768px) {
@@ -149,13 +171,38 @@
 </head>
 <body>
 
+<svg style="display:none;">
+    <defs>
+        <g id="icon-cart"><path class="icon-primary" d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></g>
+        <g id="icon-stats"><path class="icon-primary" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></g>
+        <g id="icon-folder"><path class="icon-primary" d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></g>
+        <g id="icon-settings"><path class="icon-primary" d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.73 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .43-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.49-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></g>
+        <g id="icon-user"><path class="icon-primary" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></g>
+        <g id="icon-search"><path class="icon-primary" d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 12.01 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 12.01 14 9.5 14z"/></g>
+        <g id="icon-refresh"><path class="icon-primary" d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></g>
+        <g id="icon-calendar"><path class="icon-primary" d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></g>
+        <g id="icon-globe"><path class="icon-primary" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></g>
+        
+        <g id="icon-audit"><path class="icon-success" d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></g>
+        <g id="icon-save"><path class="icon-success" d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></g>
+        <g id="icon-check"><path class="icon-success" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></g>
+        
+        <g id="icon-trash"><path class="icon-danger" d="M16 9v10H8V9h8m-1.5-6h-5l-1 1H5v2h14V4h-3.5l-1-1zM18 7H6v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7z"/></g>
+        <g id="icon-close"><path class="icon-danger" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></g>
+        
+        <g id="icon-box"><path class="icon-warning" d="M21 16.5c0 .38-.21.71-.53.88l-7.9 3.79c-.36.17-.77.17-1.14 0l-7.9-3.79C3.21 17.21 3 16.88 3 16.5v-9c0-.38.21-.71.53-.88l7.9-3.79c.36-.17.77-.17 1.14 0l7.9 3.79c.32.17.53.5.53.88v9zM12 4.15L6.04 7 12 9.85 17.96 7 12 4.15zM5 15.91l6 2.88V12L5 9.12v6.79zm14 0v-6.79L13 12v6.79l6-2.88z"/></g>
+        <g id="icon-edit"><path class="icon-primary" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></g>
+    </defs>
+</svg>
+
 <div class="container">
     <div class="header-top">
         <h1>
-            <img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/1f6d2.svg" class="emoji-icon" alt="cart">
+            <svg class="svg-icon" style="width:28px; height:28px;"><use href="#icon-cart"></use></svg>
             Kološ Tracker
         </h1>
         
+        <!-- Custom Language Selector -->
         <div class="custom-lang-switcher" id="custom-lang">
             <div class="select-selected" id="lang-current">
                 <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzIDIiPjxyZWN0IHdpZHRoPSIzIiBoZWlnaHQ9IjIiIGZpbGw9IiNkNzE0MWEiLz48cmVjdCB3aWR0aD0iMyIgaGVpZ2h0PSIxIiBmaWxsPSIjZmZmIi8+PHBvbHlnb24gcG9pbnRzPSIwLDAgMCwyIDEuNSwxIiBmaWxsPSIjMTE0NTdlIi8+PC9zdmc+" class="flag-icon"> Čeština
@@ -170,20 +217,22 @@
     </div>
 </div>
 
+<!-- ================= AUTH SCREEN ================= -->
 <div id="screen-auth" class="screen active-screen container">
     <div class="card" style="text-align: center;">
         <h2 data-i18n="auth_title" style="margin-bottom: 30px; justify-content: center;">Vyberte přístupovou roli</h2>
         <button class="btn role-btn" style="background-color: var(--text-main);" onclick="showScreen('screen-login')">
-            <img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/2699.svg" class="emoji-icon" alt="gear"> <span data-i18n="role_tl">Vedoucí týmu (TL)</span>
+            <svg class="svg-icon" style="fill:white;"><use href="#icon-settings"></use></svg> <span data-i18n="role_tl">Vedoucí týmu (TL)</span>
         </button>
         <button class="btn role-btn" onclick="showScreen('screen-emp')">
-            <img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/1f464.svg" class="emoji-icon" alt="user"> <span data-i18n="role_emp">Zaměstnanec</span>
+            <svg class="svg-icon" style="fill:white;"><use href="#icon-user"></use></svg> <span data-i18n="role_emp">Zaměstnanec</span>
         </button>
     </div>
 </div>
 
+<!-- ================= TL LOGIN SCREEN ================= -->
 <div id="screen-login" class="screen container">
-    <button class="btn btn-secondary" style="margin-bottom:20px; width: fit-content;" onclick="showScreen('screen-auth')">
+    <button class="btn-outline btn" style="margin-bottom:20px; width: fit-content; padding: 12px 24px;" onclick="showScreen('screen-auth')">
         <span data-i18n="btn_back">Zpět</span>
     </button>
     <div class="card">
@@ -195,58 +244,65 @@
             <input type="password" id="login-pass" placeholder="Heslo">
         </div>
         <button class="btn" style="width: 100%;" onclick="doLogin()">
-            <img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/2705.svg" class="emoji-icon" alt="check"> <span data-i18n="btn_enter">Přihlásit se</span>
+            <svg class="svg-icon" style="fill:white;"><use href="#icon-check"></use></svg> <span data-i18n="btn_enter">Přihlásit se</span>
         </button>
     </div>
 </div>
 
+<!-- ================= EMPLOYEE SCREEN ================= -->
 <div id="screen-emp" class="screen container">
-    <button class="btn btn-secondary" style="margin-bottom:20px; width: fit-content;" onclick="showScreen('screen-auth')">
+    <button class="btn-outline btn" style="margin-bottom:20px; width: fit-content; padding: 12px 24px;" onclick="showScreen('screen-auth')">
         <span data-i18n="btn_back">Zpět</span>
     </button>
     
     <div class="card">
         <h2 data-i18n="emp_select_name">Zvolte své jméno:</h2>
-        <select id="emp-who" class="form-group" style="width:100%; max-width:100%;"></select>
+        <select id="emp-who" class="form-group" style="width:100%; max-width:100%;" onchange="loadEmpDraft()"></select>
     </div>
 
     <div class="card">
         <h3 data-i18n="emp_cages" style="margin-top:0;">Označte dokončené klece:</h3>
-        <p style="color: var(--text-muted); font-weight: 500; font-size: 14px;" data-i18n="emp_cages_info">Poznámka: Šedé klece byly již zpracovány v aktuálním cyklu.</p>
+        <p style="color: var(--text-muted); font-weight: 500; font-size: 14px;" data-i18n="emp_cages_info">Poznámka: Šedé klece byly již zpracovány v aktuálním cyklu a nevyžadují zásah.</p>
         <div id="emp-cages-list" class="cages-grid"></div>
         <button class="btn" style="width: 100%; margin-top:25px;" onclick="submitEmp()">
-            <img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/2705.svg" class="emoji-icon" alt="check"> <span data-i18n="emp_submit">Odeslat ke kontrole</span>
+            <svg class="svg-icon" style="fill:white;"><use href="#icon-check"></use></svg> <span data-i18n="emp_submit">Odeslat ke kontrole</span>
         </button>
     </div>
 </div>
 
+<!-- ================= TEAM LEADER DASHBOARD ================= -->
 <div id="screen-tl-dash" class="screen container">
+    <!-- Logout Button -->
     <div style="display:flex; justify-content:flex-start; margin-bottom:15px;">
-        <button class="btn btn-secondary" style="background:#000000; color:#ffffff;" onclick="showScreen('screen-auth')">
+        <button class="btn btn-dark" style="padding: 12px 24px;" onclick="showScreen('screen-auth')">
             <span data-i18n="btn_logout">Odhlásit se</span>
         </button>
     </div>
 
     <div class="tabs">
-        <button id="tab-audit" class="active" onclick="switchTab('audit')"><img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/1f4dd.svg" class="emoji-icon" alt="audit"> <span data-i18n="tab_audit">Audit</span></button>
-        <button id="tab-stats" onclick="switchTab('stats')"><img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/1f4ca.svg" class="emoji-icon" alt="stats"> <span data-i18n="tab_stats">Statistika</span></button>
-        <button id="tab-data" onclick="switchTab('data')"><img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/1f4c2.svg" class="emoji-icon" alt="data"> <span data-i18n="tab_data">Data</span></button>
-        <button id="tab-settings" onclick="switchTab('settings')"><img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/2699.svg" class="emoji-icon" alt="settings"> <span data-i18n="tab_settings">Správa</span></button>
+        <button id="tab-audit" class="active" onclick="switchTab('audit')"><svg class="svg-icon"><use href="#icon-audit"></use></svg> <span data-i18n="tab_audit">Audit</span></button>
+        <button id="tab-coverage" onclick="switchTab('coverage')"><svg class="svg-icon"><use href="#icon-check"></use></svg> <span data-i18n="tab_coverage">Pokrytí</span></button>
+        <button id="tab-stats" onclick="switchTab('stats')"><svg class="svg-icon"><use href="#icon-stats"></use></svg> <span data-i18n="tab_stats">Statistika</span></button>
+        <button id="tab-data" onclick="switchTab('data')"><svg class="svg-icon"><use href="#icon-folder"></use></svg> <span data-i18n="tab_data">Data</span></button>
+        <button id="tab-settings" onclick="switchTab('settings')"><svg class="svg-icon"><use href="#icon-settings"></use></svg> <span data-i18n="tab_settings">Správa</span></button>
     </div>
 
+    <!-- TL: AUDIT SECTION -->
     <div id="sec-audit" class="section active">
         <div class="tabs sub-tabs">
             <button id="mode-auto-btn" class="active" onclick="setAuditMode('auto')" data-i18n="audit_mode_auto">Automaticky (Fronta požadavků)</button>
             <button id="mode-manual-btn" onclick="setAuditMode('manual')" data-i18n="audit_mode_manual">Manuální zadání</button>
         </div>
 
+        <!-- AUTO QUEUE -->
         <div id="audit-auto-view">
             <button class="btn" style="margin-bottom:15px; background:var(--high); font-size: 14px; padding: 10px 18px;" onclick="resetKPICycle()">
-                <img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/1f504.svg" class="emoji-icon" alt="refresh"> <span data-i18n="reset_kpi">Resetovat cyklus KPI</span>
+                <svg class="svg-icon" style="fill:white;"><use href="#icon-refresh"></use></svg> <span data-i18n="reset_kpi">Resetovat cyklus blokace klecí</span>
             </button>
             <div id="auto-queue-list"></div>
         </div>
 
+        <!-- MANUAL AUDIT -->
         <div id="audit-manual-view" style="display:none;">
             <div class="card">
                 <label data-i18n="select_worker">Vyberte zaměstnance pro kontrolu:</label>
@@ -257,11 +313,12 @@
                 <label data-i18n="done_cages">Zpracované klece k ověření:</label>
                 <div id="tl-cages-list" class="cages-grid"></div>
                 <button class="btn" style="margin-top:20px;" onclick="generateSampleManual()">
-                    <img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/1f50d.svg" class="emoji-icon" alt="search"> <span data-i18n="btn_generate">Vygenerovat kontrolní vzorek</span>
+                    <svg class="svg-icon" style="fill:white;"><use href="#icon-search"></use></svg> <span data-i18n="btn_generate">Vygenerovat kontrolní vzorek</span>
                 </button>
             </div>
         </div>
 
+        <!-- RESULT BOX (Shared) -->
         <div id="result-box">
             <h3 data-i18n="cages_to_test">Položky vybrané k fyzické kontrole:</h3>
             <p id="sample-stats"></p>
@@ -269,12 +326,29 @@
             <ul id="sample-list"></ul>
             <div style="margin-top: 25px;">
                 <button class="btn" style="width: 100%;" onclick="finishAudit()">
-                    <img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/1f4be.svg" class="emoji-icon" alt="save"> <span data-i18n="btn_save_audit">Uložit výsledek auditu</span>
+                    <svg class="svg-icon" style="fill:white;"><use href="#icon-save"></use></svg> <span data-i18n="btn_save_audit">Uložit výsledek auditu</span>
                 </button>
             </div>
         </div>
     </div>
     
+    <!-- TL: COVERAGE SECTION -->
+    <div id="sec-coverage" class="section">
+        <div class="card">
+            <div class="header-flex">
+                <div>
+                    <h2 data-i18n="cov_title">Pokrytí kontrol (Týdenní cyklus)</h2>
+                    <p style="color:var(--text-muted);font-size:14px;" data-i18n="cov_desc">Přehled kategorií, které již byly v tomto týdnu podrobeny kontrole.</p>
+                </div>
+                <button class="btn btn-secondary" onclick="resetCoverage()">
+                    <svg class="svg-icon" style="fill:white;"><use href="#icon-refresh"></use></svg> <span data-i18n="btn_cov_reset">Resetovat týdenní cyklus</span>
+                </button>
+            </div>
+            <div id="coverage-grid" class="cages-grid" style="margin-top:20px;"></div>
+        </div>
+    </div>
+
+    <!-- TL: STATS SECTION -->
     <div id="sec-stats" class="section">
         <div class="card">
             <div class="header-flex">
@@ -283,7 +357,7 @@
                     <p style="color: var(--text-muted); font-size: 14px; margin: 5px 0 0 0;" data-i18n="stats_formula">Výpočet chybovosti: (Chyby / Zpracované klece) × 100</p>
                 </div>
                 <button class="btn btn-secondary" onclick="closeMonth()">
-                    <img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/1f4c5.svg" class="emoji-icon" alt="calendar"> <span data-i18n="btn_close_month">Uzavřít účetní měsíc</span>
+                    <svg class="svg-icon" style="fill:white;"><use href="#icon-calendar"></use></svg> <span data-i18n="btn_close_month">Uzavřít účetní měsíc</span>
                 </button>
             </div>
             <p style="font-size: 13px; color: var(--primary);" data-i18n="dbl_click_hint">Poznámka: Dvojitým kliknutím na řádek zobrazíte detailní graf vývoje zaměstnance.</p>
@@ -298,15 +372,16 @@
         </div>
     </div>
 
+    <!-- TL: DATA SECTION -->
     <div id="sec-data" class="section">
         <div class="card">
             <h2 data-i18n="data_title">Systémový archiv dat</h2>
             <div class="tabs sub-tabs">
                 <button id="subtab-history" class="active" onclick="switchDataSubTab('history')">
-                    <img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/1f4c5.svg" class="emoji-icon" alt="calendar"> <span data-i18n="subtab_history">Měsíční přehledy</span>
+                    <svg class="svg-icon"><use href="#icon-calendar"></use></svg> <span data-i18n="subtab_history">Měsíční přehledy</span>
                 </button>
                 <button id="subtab-alltime" onclick="switchDataSubTab('alltime')">
-                    <img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/1f30d.svg" class="emoji-icon" alt="globe"> <span data-i18n="subtab_alltime">Globální statistika</span>
+                    <svg class="svg-icon"><use href="#icon-globe"></use></svg> <span data-i18n="subtab_alltime">Globální statistika</span>
                 </button>
             </div>
             <p style="font-size: 13px; color: var(--primary);" data-i18n="dbl_click_hint">Poznámka: Dvojitým kliknutím na řádek zobrazíte detailní graf vývoje zaměstnance.</p>
@@ -325,6 +400,7 @@
         </div>
     </div>
 
+    <!-- TL: SETTINGS SECTION -->
     <div id="sec-settings" class="section">
         <div class="card">
             <h2 data-i18n="settings_title">Administrace personálu</h2>
@@ -336,7 +412,7 @@
                     <option value="high">Vysoké riziko (50%)</option>
                 </select>
                 <button class="btn btn-secondary" onclick="addWorker()">
-                    <img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/1f4be.svg" class="emoji-icon" alt="save"> <span data-i18n="btn_add_worker">Přidat do systému</span>
+                    <svg class="svg-icon" style="fill:white;"><use href="#icon-save"></use></svg> <span data-i18n="btn_add_worker">Zaevidovat</span>
                 </button>
             </div>
             <div class="table-responsive">
@@ -349,12 +425,13 @@
     </div>
 </div>
 
+<!-- PROFILE MODAL -->
 <div id="profile-modal" class="modal">
     <div class="modal-content">
-        <span class="close-btn" onclick="closeProfile()"><img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/274c.svg" style="width:24px; height:24px;" alt="close"></span>
+        <span class="close-btn" onclick="closeProfile()"><svg class="svg-icon"><use href="#icon-close"></use></svg></span>
         <h2 id="profile-title" style="margin-bottom: 20px;">Analytický profil</h2>
         <button class="btn btn-secondary" id="btn-toggle-global" onclick="toggleGlobalStats()" style="margin-bottom: 15px;">
-            <img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/1f4ca.svg" class="emoji-icon" alt="stats"> <span data-i18n="btn_toggle_global">Zobrazit srovnání s průměrem</span>
+            <svg class="svg-icon" style="fill:white;"><use href="#icon-stats"></use></svg> <span data-i18n="btn_toggle_global">Zobrazit srovnání s průměrem</span>
         </button>
         <div class="chart-container">
             <canvas id="profileChart"></canvas>
@@ -368,62 +445,65 @@
         cs: {
             auth_title: "Zvolte přístupovou roli", role_tl: "Vedoucí týmu (TL)", role_emp: "Zaměstnanec", btn_back: "Zpět", btn_logout: "Odhlásit se",
             login_title: "Přihlášení do systému", btn_enter: "Přihlásit se", login_err: "Zadané identifikační údaje jsou nesprávné.",
-            emp_select_name: "Zvolte prosím své jméno:", emp_cages: "Označte dokončené klece:", emp_cages_info: "Poznámka: Šedé klece byly již zpracovány v rámci aktuálního cyklu.", emp_submit: "Odeslat ke kontrole", emp_success: "Data byla úspěšně odeslána ke kontrole.", emp_confirm_submit: "Opravdu si přejete odeslat zadaná data k auditu?",
-            audit_mode_auto: "Automaticky (Fronta požadavků)", audit_mode_manual: "Manuální zadání", reset_kpi: "Resetovat cyklus KPI", reset_kpi_confirm: "Skutečně si přejete vymazat historii blokovaných klecí a zahájit nový cyklus?", queue_empty: "Aktuálně nejsou žádné nevyřízené požadavky ke kontrole.", btn_check: "Zahájit kontrolu", btn_cancel: "Zamítnout požadavek", cages_count: "Počet nahlášených klecí: %count%",
+            emp_select_name: "Zvolte prosím své jméno:", emp_cages: "Označte dokončené klece:", emp_cages_info: "Poznámka: Šedé klece byly již zpracovány v rámci aktuálního cyklu a nevyžadují zásah.", emp_submit: "Odeslat ke kontrole", emp_success: "Data byla úspěšně odeslána ke kontrole.", emp_confirm_submit: "Opravdu si přejete odeslat zadaná data k auditu?",
+            audit_mode_auto: "Automaticky (Fronta požadavků)", audit_mode_manual: "Manuální zadání", reset_kpi: "Resetovat cyklus blokace klecí", reset_kpi_confirm: "Skutečně si přejete vymazat historii blokovaných klecí a zahájit nový cyklus?", queue_empty: "Aktuálně nejsou žádné nevyřízené požadavky ke kontrole.", btn_check: "Zahájit kontrolu", btn_cancel: "Zamítnout požadavek", btn_regen: "Generovat nový vzorek", cages_count: "Počet nahlášených klecí: %count%",
             show_details: "Zobrazit detaily ▾", hide_details: "Skrýt detaily ▴", alert_cancel_confirm: "Skutečně si přejete zamítnout tento požadavek a uvolnit dotčené klece zpět do systému?",
-            tab_audit: "Audit", tab_stats: "Statistika", tab_data: "Data", tab_settings: "Správa", select_worker: "Vyberte zaměstnance pro kontrolu:", done_cages: "Zpracované klece k ověření:", btn_generate: "Vygenerovat kontrolní vzorek", cages_to_test: "Položky vybrané k fyzické kontrole:", click_error: "Označte položky, u kterých byl zjištěn nedostatek:", btn_save_audit: "Uložit výsledek auditu", stats_title: "Měsíční statistika výkonnosti", stats_formula: "Výpočet chybovosti: (Chyby / Zpracované klece) × 100", btn_close_month: "Uzavřít účetní měsíc", th_name: "Zaměstnanec", th_cages: "Celkem klecí", th_shifts: "Prac. dny", th_avg: "Průměr / den", th_errors: "Zjištěné chyby", th_error_rate: "Chybovost (%)", th_risk: "Status rizika", data_title: "Systémový archiv dat", subtab_history: "Měsíční přehledy", subtab_alltime: "Globální statistika", history_desc: "Archiv výkonnosti po jednotlivých účetních obdobích.", alltime_desc: "Agregovaná data za celou dobu evidence v systému.", th_cages_all: "Úhrn klecí", th_shifts_all: "Úhrn prac. dnů", th_errors_all: "Úhrn chyb", th_error_rate_all: "Celková chybovost", settings_title: "Administrace personálu", placeholder_name: "Jméno a příjmení", btn_add_worker: "Přidat do systému", th_risk_set: "Přiřazené riziko", th_action: "Správa", alert_no_worker: "Zvolte prosím zaměstnance ze seznamu.", alert_no_cage: "Vyberte prosím alespoň jednu položku k analýze.", alert_no_count: "Zadejte prosím přesný počet pro kategorii:", alert_saved_err: "Záznam byl uložen. U zaměstnance %name% byl zjištěn následující počet pochybení: %err%.", alert_saved_ok: "Záznam byl uložen. Kontrola u zaměstnance %name% proběhla zcela bez nálezu.", alert_add_ok: "Zaměstnanec byl úspěšně zaevidován.", alert_del_confirm: "Opravdu si přejete trvale odstranit záznam zaměstnance: %name%?", alert_month_confirm: "Potvrzujete záměr uzavřít měsíc?\nData budou trvale archivována, skóre vynulováno a rizikové profily automaticky aktualizovány.", alert_month_ok: "Měsíční data byla úspěšně zpracována a uložena.", lbl_error: "Zaznamenat chybu", lbl_count: "Zadejte množství:", placeholder_count: "Např. 2", lbl_empty_db: "-- Databáze je prázdná --", lbl_empty_history: "Nejsou k dispozici žádné archivní záznamy.", stat_done: "Celkový objem:", stat_risk: "Stanovené riziko:", stat_test: "Vybráno k ověření:", dbl_click_hint: "Poznámka: Dvojitým kliknutím na řádek zobrazíte detailní analytický graf.", profile_title: "Analytický profil: %name%", btn_toggle_global: "Zobrazit srovnání s průměrem", current_month: "Aktuální", chart_avg_cages: "Výkonnost (Zaměstnanec)", chart_err_rate: "Míra pochybení (Zaměstnanec) %", chart_global_avg: "Výkonnost (Průměr závodu)", chart_global_err: "Míra pochybení (Průměr závodu) %", done_blocked: "(Již zpracováno)"
+            tab_audit: "Audit", tab_coverage: "Pokrytí", tab_stats: "Statistika", tab_data: "Data", tab_settings: "Správa", select_worker: "Vyberte zaměstnance pro kontrolu:", done_cages: "Zpracované klece k ověření:", btn_generate: "Vygenerovat kontrolní vzorek", cages_to_test: "Položky vybrané k fyzické kontrole:", click_error: "Označte položky, u kterých byl zjištěn nedostatek:", btn_save_audit: "Uložit výsledek auditu", stats_title: "Měsíční statistika výkonnosti", stats_formula: "Výpočet chybovosti: (Chyby / Zpracované klece) × 100", btn_close_month: "Uzavřít účetní měsíc", th_name: "Zaměstnanec", th_cages: "Celkem klecí", th_shifts: "Prac. dny", th_avg: "Průměr / den", th_errors: "Zjištěné chyby", th_error_rate: "Chybovost (%)", th_risk: "Status rizika", data_title: "Systémový archiv dat", subtab_history: "Měsíční přehledy", subtab_alltime: "Globální statistika", history_desc: "Archiv výkonnosti po jednotlivých účetních obdobích.", alltime_desc: "Agregovaná data za celou dobu evidence v systému.", th_cages_all: "Úhrn klecí", th_shifts_all: "Úhrn prac. dnů", th_errors_all: "Úhrn chyb", th_error_rate_all: "Celková chybovost", settings_title: "Administrace personálu", placeholder_name: "Jméno a příjmení", btn_add_worker: "Zaevidovat do systému", th_risk_set: "Přiřazené riziko", th_action: "Správa", alert_no_worker: "Zvolte prosím zaměstnance ze seznamu.", alert_no_cage: "Vyberte prosím alespoň jednu položku k analýze.", alert_no_count: "Zadejte prosím přesný počet pro kategorii:", alert_saved_err: "Záznam byl uložen. U zaměstnance %name% byl zjištěn následující počet pochybení: %err%.", alert_saved_ok: "Záznam byl uložen. Kontrola u zaměstnance %name% proběhla zcela bez nálezu.", alert_add_ok: "Zaměstnanec byl úspěšně zaevidován.", alert_del_confirm: "Opravdu si přejete trvale odstranit záznam zaměstnance: %name%?\nOdstraní se i jeho nezkontrolované požadavky.", alert_month_confirm: "Potvrzujete záměr uzavřít měsíc?\nData budou trvale archivována, skóre vynulováno a rizikové profily automaticky aktualizovány.", alert_month_ok: "Měsíční data byla úspěšně zpracována a uložena.", lbl_error: "Zaznamenat chybu", lbl_count: "Zadejte množství:", placeholder_count: "Např. 2", lbl_empty_db: "-- Databáze je prázdná --", lbl_empty_history: "Nejsou k dispozici žádné archivní záznamy.", stat_done: "Celkový objem:", stat_risk: "Stanovené riziko:", stat_test: "Vybráno k ověření:", dbl_click_hint: "Poznámka: Dvojitým kliknutím na řádek zobrazíte detailní analytický graf.", profile_title: "Analytický profil: %name%", btn_toggle_global: "Zobrazit srovnání s průměrem", current_month: "Aktuální", chart_avg_cages: "Výkonnost (Zaměstnanec)", chart_err_rate: "Míra pochybení (Zaměstnanec) %", chart_global_avg: "Výkonnost (Průměr závodu)", chart_global_err: "Míra pochybení (Průměr závodu) %", done_blocked: "Již zpracováno", refill_badge: "Doplňovat průběžně!", audited_badge: "Již kontrolováno tento týden", edit_prompt: "Zadejte nové jméno zaměstnance:", cov_title: "Pokrytí kontrol (Týdenní cyklus)", cov_desc: "Přehled kategorií, které již byly v tomto týdnu podrobeny kontrole.", btn_cov_reset: "Resetovat týdenní pokrytí", cov_reset_confirm: "Opravdu chcete vymazat historii kontrol pro tento týden?"
         },
         en: {
             auth_title: "Select Access Role", role_tl: "Team Leader", role_emp: "Employee", btn_back: "Back", btn_logout: "Log Out",
             login_title: "System Authentication", btn_enter: "Log In", login_err: "Invalid credentials provided.",
-            emp_select_name: "Please select your profile:", emp_cages: "Indicate completed tasks:", emp_cages_info: "Note: Greyed out items have been processed in the current cycle.", emp_submit: "Submit for Verification", emp_success: "Data successfully submitted.", emp_confirm_submit: "Do you confirm the submission of this data for audit?",
-            audit_mode_auto: "Automatic (Request Queue)", audit_mode_manual: "Manual Entry", reset_kpi: "Reset KPI Cycle", reset_kpi_confirm: "Confirm clearing the active task cycle to begin a new evaluation period?", queue_empty: "No pending verification requests.", btn_check: "Initiate Audit", btn_cancel: "Reject Request", cages_count: "Reported items: %count%",
+            emp_select_name: "Please select your profile:", emp_cages: "Indicate completed tasks:", emp_cages_info: "Note: Greyed out items have been processed in the current cycle and require no action.", emp_submit: "Submit for Verification", emp_success: "Data successfully submitted.", emp_confirm_submit: "Do you confirm the submission of this data for audit?",
+            audit_mode_auto: "Automatic (Request Queue)", audit_mode_manual: "Manual Entry", reset_kpi: "Reset Cage Block Cycle", reset_kpi_confirm: "Confirm clearing the active task cycle to begin a new evaluation period?", queue_empty: "No pending verification requests.", btn_check: "Initiate Audit", btn_cancel: "Reject Request", btn_regen: "Regenerate Sample", cages_count: "Reported items: %count%",
             show_details: "View details ▾", hide_details: "Hide details ▴", alert_cancel_confirm: "Confirm rejection of this request? Affected items will be released back into the system.",
-            tab_audit: "Audit", tab_stats: "Statistics", tab_data: "Archive", tab_settings: "Personnel", select_worker: "Select employee for audit:", done_cages: "Processed items to verify:", btn_generate: "Generate Control Sample", cages_to_test: "Items selected for physical inspection:", click_error: "Mark verified discrepancies:", btn_save_audit: "Save Audit Results", stats_title: "Monthly Performance Metrics", stats_formula: "Error Rate Calculation: (Errors / Total Processed) × 100", btn_close_month: "Conclude Financial Month", th_name: "Employee", th_cages: "Total Volume", th_shifts: "Active Days", th_avg: "Daily Avg.", th_errors: "Discrepancies", th_error_rate: "Error Rate (%)", th_risk: "Risk Profile", data_title: "System Data Archive", subtab_history: "Monthly Reports", subtab_alltime: "Global Statistics", history_desc: "Performance records aggregated by accounting periods.", alltime_desc: "Cumulative data across the entire recorded tenure.", th_cages_all: "Lifetime Volume", th_shifts_all: "Lifetime Days", th_errors_all: "Lifetime Errors", th_error_rate_all: "Overall Error Rate", settings_title: "Personnel Administration", placeholder_name: "Full Name", btn_add_worker: "Register Employee", th_risk_set: "Assigned Risk", th_action: "Management", alert_no_worker: "Please specify an employee profile.", alert_no_cage: "Please select at least one item for analysis.", alert_no_count: "Please provide exact quantity for category:", alert_saved_err: "Record saved. Employee %name% registered %err% discrepancy/ies.", alert_saved_ok: "Record saved. Inspection for %name% concluded with zero discrepancies.", alert_add_ok: "Employee profile successfully created.", alert_del_confirm: "Irreversibly delete employee profile: %name%?", alert_month_confirm: "Confirm monthly closure?\nData will be archived, operational scores reset, and risk metrics recalibrated.", alert_month_ok: "Monthly data successfully processed and archived.", lbl_error: "Register Discrepancy", lbl_count: "Specify quantity:", placeholder_count: "E.g. 2", lbl_empty_db: "-- Database is empty --", lbl_empty_history: "No historical records available.", stat_done: "Total Volume:", stat_risk: "Assessed Risk:", stat_test: "Selected for Review:", dbl_click_hint: "Note: Double-click a row to access detailed analytical charts.", profile_title: "Analytical Profile: %name%", btn_toggle_global: "Display Facility Average", current_month: "Current", chart_avg_cages: "Throughput (Employee)", chart_err_rate: "Error Rate (Employee) %", chart_global_avg: "Throughput (Facility Avg.)", chart_global_err: "Error Rate (Facility Avg.) %", done_blocked: "(Processed)"
+            tab_audit: "Audit", tab_coverage: "Coverage", tab_stats: "Statistics", tab_data: "Archive", tab_settings: "Personnel", select_worker: "Select employee for audit:", done_cages: "Processed items to verify:", btn_generate: "Generate Control Sample", cages_to_test: "Items selected for physical inspection:", click_error: "Mark verified discrepancies:", btn_save_audit: "Save Audit Results", stats_title: "Monthly Performance Metrics", stats_formula: "Error Rate Calculation: (Errors / Total Processed) × 100", btn_close_month: "Conclude Financial Month", th_name: "Employee", th_cages: "Total Volume", th_shifts: "Active Days", th_avg: "Daily Avg.", th_errors: "Discrepancies", th_error_rate: "Error Rate (%)", th_risk: "Risk Profile", data_title: "System Data Archive", subtab_history: "Monthly Reports", subtab_alltime: "Global Statistics", history_desc: "Performance records aggregated by accounting periods.", alltime_desc: "Cumulative data across the entire recorded tenure.", th_cages_all: "Lifetime Volume", th_shifts_all: "Lifetime Days", th_errors_all: "Lifetime Errors", th_error_rate_all: "Overall Error Rate", settings_title: "Personnel Administration", placeholder_name: "Full Name", btn_add_worker: "Register in System", th_risk_set: "Assigned Risk", th_action: "Management", alert_no_worker: "Please specify an employee profile.", alert_no_cage: "Please select at least one item for analysis.", alert_no_count: "Please provide exact quantity for category:", alert_saved_err: "Record saved. Employee %name% registered %err% discrepancy/ies.", alert_saved_ok: "Record saved. Inspection for %name% concluded with zero discrepancies.", alert_add_ok: "Employee profile successfully created.", alert_del_confirm: "Irreversibly delete employee profile: %name%?\nPending requests will also be deleted.", alert_month_confirm: "Confirm monthly closure?\nData will be archived, operational scores reset, and risk metrics recalibrated.", alert_month_ok: "Monthly data successfully processed and archived.", lbl_error: "Register Discrepancy", lbl_count: "Specify quantity:", placeholder_count: "E.g. 2", lbl_empty_db: "-- Database is empty --", lbl_empty_history: "No historical records available.", stat_done: "Total Volume:", stat_risk: "Assessed Risk:", stat_test: "Selected for Review:", dbl_click_hint: "Note: Double-click a row to access detailed analytical charts.", profile_title: "Analytical Profile: %name%", btn_toggle_global: "Display Facility Average", current_month: "Current", chart_avg_cages: "Throughput (Employee)", chart_err_rate: "Error Rate (Employee) %", chart_global_avg: "Throughput (Facility Avg.)", chart_global_err: "Error Rate (Facility Avg.) %", done_blocked: "Processed", refill_badge: "Refill continuously!", audited_badge: "Audited this week", edit_prompt: "Enter new employee name:", cov_title: "Audit Coverage (Weekly)", cov_desc: "Overview of categories audited this week.", btn_cov_reset: "Reset Weekly Coverage", cov_reset_confirm: "Clear audit history for this week?"
         },
         ru: {
             auth_title: "Выберите роль доступа", role_tl: "Руководитель (TL)", role_emp: "Сотрудник", btn_back: "Назад", btn_logout: "Выйти из системы",
             login_title: "Авторизация", btn_enter: "Войти", login_err: "Указаны неверные учетные данные.",
-            emp_select_name: "Выберите ваш профиль:", emp_cages: "Укажите выполненные задачи:", emp_cages_info: "Примечание: Серые элементы уже были обработаны в текущем цикле.", emp_submit: "Отправить на проверку", emp_success: "Данные успешно переданы на проверку.", emp_confirm_submit: "Вы подтверждаете отправку данных для проведения аудита?",
-            audit_mode_auto: "Очередь запросов", audit_mode_manual: "Ручной ввод", reset_kpi: "Сбросить цикл KPI", reset_kpi_confirm: "Вы подтверждаете очистку текущего пула задач для начала нового цикла?", queue_empty: "Ожидающих проверок в системе нет.", btn_check: "Начать проверку", btn_cancel: "Отклонить запрос", cages_count: "Заявленный объем: %count%",
+            emp_select_name: "Выберите ваш профиль:", emp_cages: "Укажите выполненные задачи:", emp_cages_info: "Примечание: Серые элементы уже были обработаны в текущем цикле и не требуют действий.", emp_submit: "Отправить на проверку", emp_success: "Данные успешно переданы на проверку.", emp_confirm_submit: "Вы подтверждаете отправку данных для проведения аудита?",
+            audit_mode_auto: "Очередь запросов", audit_mode_manual: "Ручной ввод", reset_kpi: "Сбросить цикл блокировки", reset_kpi_confirm: "Вы подтверждаете очистку текущего пула задач для начала нового цикла?", queue_empty: "Ожидающих проверок в системе нет.", btn_check: "Начать проверку", btn_cancel: "Отклонить запрос", btn_regen: "Создать новую выборку", cages_count: "Заявленный объем: %count%",
             show_details: "Показать детали ▾", hide_details: "Скрыть детали ▴", alert_cancel_confirm: "Подтверждаете ли Вы отмену данного запроса? Выбранные позиции будут возвращены в общий пул.",
-            tab_audit: "Аудит", tab_stats: "Статистика", tab_data: "Архив", tab_settings: "Персонал", select_worker: "Выберите сотрудника для проверки:", done_cages: "Выполненный объем для оценки:", btn_generate: "Сформировать контрольную выборку", cages_to_test: "Позиции, отобранные для физической проверки:", click_error: "Зафиксируйте выявленные несоответствия:", btn_save_audit: "Сохранить результаты аудита", stats_title: "Ежемесячные показатели эффективности", stats_formula: "Расчет доли брака: (Ошибки / Общий объем) × 100", btn_close_month: "Закрыть отчетный период", th_name: "Сотрудник", th_cages: "Общий объем", th_shifts: "Рабочие дни", th_avg: "В ср. за день", th_errors: "Кол-во ошибок", th_error_rate: "Доля брака (%)", th_risk: "Профиль риска", data_title: "Системный архив данных", subtab_history: "Ежемесячные отчеты", subtab_alltime: "Глобальная статистика", history_desc: "Архив показателей эффективности по отчетным периодам.", alltime_desc: "Агрегированные данные за весь период работы сотрудника.", th_cages_all: "Объем (весь период)", th_shifts_all: "Дни (весь период)", th_errors_all: "Ошибки (весь период)", th_error_rate_all: "Общая доля брака", settings_title: "Управление персоналом", placeholder_name: "ФИО сотрудника", btn_add_worker: "Зарегистрировать", th_risk_set: "Назначенный риск", th_action: "Действия", alert_no_worker: "Пожалуйста, выберите профиль сотрудника.", alert_no_cage: "Пожалуйста, выберите хотя бы одну позицию для анализа.", alert_no_count: "Необходимо указать точное количество для категории:", alert_saved_err: "Запись сохранена. За сотрудником %name% зафиксировано несоответствий: %err%.", alert_saved_ok: "Запись сохранена. Проверка сотрудника %name% прошла без замечаний.", alert_add_ok: "Профиль сотрудника успешно создан.", alert_del_confirm: "Вы подтверждаете безвозвратное удаление профиля: %name%?", alert_month_confirm: "Подтверждаете закрытие отчетного периода?\nДанные будут перенесены в архив, текущие метрики обнулены, а уровни риска пересмотрены.", alert_month_ok: "Данные отчетного периода успешно обработаны и сохранены.", lbl_error: "Зафиксировать ошибку", lbl_count: "Укажите количество:", placeholder_count: "Например, 2", lbl_empty_db: "-- База данных пуста --", lbl_empty_history: "Архивные записи на данный момент отсутствуют.", stat_done: "Заявленный объем:", stat_risk: "Оценка риска:", stat_test: "Отобрано для аудита:", dbl_click_hint: "Примечание: Двойной клик по строке таблицы открывает детальный аналитический график.", profile_title: "Аналитический профиль: %name%", btn_toggle_global: "Показать средние показатели предприятия", current_month: "Текущий", chart_avg_cages: "Производительность (Сотрудник)", chart_err_rate: "Доля брака (Сотрудник) %", chart_global_avg: "Производительность (В среднем)", chart_global_err: "Доля брака (В среднем) %", done_blocked: "(Уже обработано)"
+            tab_audit: "Аудит", tab_coverage: "Охват", tab_stats: "Статистика", tab_data: "Архив", tab_settings: "Персонал", select_worker: "Выберите сотрудника для проверки:", done_cages: "Выполненный объем для оценки:", btn_generate: "Сформировать контрольную выборку", cages_to_test: "Позиции, отобранные для физической проверки:", click_error: "Зафиксируйте выявленные несоответствия:", btn_save_audit: "Сохранить результаты аудита", stats_title: "Ежемесячные показатели эффективности", stats_formula: "Расчет доли брака: (Ошибки / Общий объем) × 100", btn_close_month: "Закрыть отчетный период", th_name: "Сотрудник", th_cages: "Общий объем", th_shifts: "Рабочие дни", th_avg: "В ср. за день", th_errors: "Кол-во ошибок", th_error_rate: "Доля брака (%)", th_risk: "Профиль риска", data_title: "Системный архив данных", subtab_history: "Ежемесячные отчеты", subtab_alltime: "Глобальная статистика", history_desc: "Архив показателей эффективности по отчетным периодам.", alltime_desc: "Агрегированные данные за весь период работы сотрудника.", th_cages_all: "Объем (весь период)", th_shifts_all: "Дни (весь период)", th_errors_all: "Ошибки (весь период)", th_error_rate_all: "Общая доля брака", settings_title: "Управление персоналом", placeholder_name: "ФИО сотрудника", btn_add_worker: "Зарегистрировать в системе", th_risk_set: "Назначенный риск", th_action: "Действия", alert_no_worker: "Пожалуйста, выберите профиль сотрудника.", alert_no_cage: "Пожалуйста, выберите хотя бы одну позицию для анализа.", alert_no_count: "Необходимо указать точное количество для категории:", alert_saved_err: "Запись сохранена. За сотрудником %name% зафиксировано несоответствий: %err%.", alert_saved_ok: "Запись сохранена. Проверка сотрудника %name% прошла без замечаний.", alert_add_ok: "Профиль сотрудника успешно создан.", alert_del_confirm: "Вы подтверждаете безвозвратное удаление профиля: %name%?\nОжидающие проверки также будут удалены.", alert_month_confirm: "Подтверждаете закрытие отчетного периода?\nДанные будут перенесены в архив, текущие метрики обнулены, а уровни риска пересмотрены.", alert_month_ok: "Данные отчетного периода успешно обработаны и сохранены.", lbl_error: "Зафиксировать ошибку", lbl_count: "Укажите количество:", placeholder_count: "Например, 2", lbl_empty_db: "-- База данных пуста --", lbl_empty_history: "Архивные записи на данный момент отсутствуют.", stat_done: "Заявленный объем:", stat_risk: "Оценка риска:", stat_test: "Отобрано для аудита:", dbl_click_hint: "Примечание: Двойной клик по строке таблицы открывает детальный аналитический график.", profile_title: "Аналитический профиль: %name%", btn_toggle_global: "Показать средние показатели предприятия", current_month: "Текущий", chart_avg_cages: "Производительность (Сотрудник)", chart_err_rate: "Доля брака (Сотрудник) %", chart_global_avg: "Производительность (В среднем)", chart_global_err: "Доля брака (В среднем) %", done_blocked: "Обработано", refill_badge: "Пополнять постоянно!", audited_badge: "Уже проверено на этой неделе", edit_prompt: "Введите новое имя сотрудника:", cov_title: "Охват проверок (Неделя)", cov_desc: "Обзор категорий, проверенных на этой неделе.", btn_cov_reset: "Сбросить недельный охват", cov_reset_confirm: "Очистить историю проверок за эту неделю?"
         },
         he: {
-            auth_title: "בחר תפקיד גישה", role_tl: "מנהל צוות (TL)", role_emp: "עובד", btn_back: "חזור", btn_logout: "התנתק מהמערכת",
+            auth_title: "בחר תפקיד גישה", role_tl: "מנהל צוות (TL)", role_emp: "עובד", btn_back: "חזור", btn_logout: "התנתק",
             login_title: "אימות מערכת", btn_enter: "היכנס", login_err: "פרטי התחברות שגויים.",
-            emp_select_name: "אנא בחר את הפרופיל שלך:", emp_cages: "סמן משימות שהושלמו:", emp_cages_info: "הערה: פריטים באפור כבר עובדו במחזור הנוכחי.", emp_submit: "שלח לאימות", emp_success: "הנתונים נשלחו בהצלחה לבדיקה.", emp_confirm_submit: "האם ברצונך לאשר שליחת נתונים אלו לביקורת?",
-            audit_mode_auto: "אוטומטי (תור בקשות)", audit_mode_manual: "הזנה ידנית", reset_kpi: "איפוס מחזור KPI", reset_kpi_confirm: "האם לאשר ניקוי של מחזור המשימות הפעיל לקראת תקופת הערכה חדשה?", queue_empty: "אין בקשות אימות ממתינות.", btn_check: "התחל ביקורת", btn_cancel: "דחה בקשה", cages_count: "פריטים שדווחו: %count%",
+            emp_select_name: "אנא בחר את הפרופיל שלך:", emp_cages: "סמן משימות שהושלמו:", emp_cages_info: "הערה: פריטים באפור כבר עובדו במחזור הנוכחי ואינם דורשים פעולה.", emp_submit: "שלח לאימות", emp_success: "הנתונים נשלחו בהצלחה לבדיקה.", emp_confirm_submit: "האם ברצונך לאשר שליחת נתונים אלו לביקורת?",
+            audit_mode_auto: "אוטומטי (תור בקשות)", audit_mode_manual: "הזנה ידנית", reset_kpi: "איפוס מחזור חסימות", reset_kpi_confirm: "האם לאשר ניקוי של מחזור המשימות הפעיל לקראת תקופת הערכה חדשה?", queue_empty: "אין בקשות אימות ממתינות.", btn_check: "התחל ביקורת", btn_cancel: "דחה בקשה", btn_regen: "צור מדגם חדש", cages_count: "פריטים שדווחו: %count%",
             show_details: "הצג פרטים ▾", hide_details: "הסתר פרטים ▴", alert_cancel_confirm: "האם לאשר דחיית בקשה זו? הפריטים הרלוונטיים יוחזרו למאגר המערכת.",
-            tab_audit: "ביקורת", tab_stats: "סטטיסטיקה", tab_data: "ארכיון", tab_settings: "כוח אדם", select_worker: "בחר עובד לביקורת:", done_cages: "פריטים להערכה:", btn_generate: "הפק מדגם ביקורת", cages_to_test: "פריטים שנבחרו לבדיקה פיזית:", click_error: "סמן חריגות שאומתו:", btn_save_audit: "שמור תוצאות ביקורת", stats_title: "מדדי ביצועים חודשיים", stats_formula: "חישוב שיעור שגיאות: (שגיאות / סך הכל) × 100", btn_close_month: "סגור חודש פיננסי", th_name: "עובד", th_cages: "נפח כולל", th_shifts: "ימים פעילים", th_avg: "ממוצע יומי", th_errors: "חריגות", th_error_rate: "שיעור שגיאות (%)", th_risk: "פרופיל סיכון", data_title: "ארכיון נתוני מערכת", subtab_history: "דוחות חודשיים", subtab_alltime: "סטטיסטיקה גלובלית", history_desc: "רשומות ביצועים מקובצות לפי תקופות דיווח.", alltime_desc: "נתונים מצטברים לכל תקופת ההעסקה הרשומה.", th_cages_all: "נפח (כל הזמנים)", th_shifts_all: "ימים (כל הזמנים)", th_errors_all: "שגיאות (כל הזמנים)", th_error_rate_all: "שיעור שגיאות כולל", settings_title: "ניהול כוח אדם", placeholder_name: "שם מלא", btn_add_worker: "רשום עובד", th_risk_set: "סיכון מוקצה", th_action: "ניהול", alert_no_worker: "אנא ציין פרופיל עובד.", alert_no_cage: "אנא בחר לפחות פריט אחד לניתוח.", alert_no_count: "אנא ספק כמות מדויקת לקטגוריה:", alert_saved_err: "רשומה נשמרה. לעובד %name% נרשמו %err% חריגות.", alert_saved_ok: "רשומה נשמרה. הביקורת עבור %name% הסתיימה ללא חריגות.", alert_add_ok: "פרופיל העובד נוצר בהצלחה.", alert_del_confirm: "האם למחוק באופן בלתי הפיך את הפרופיל: %name%?", alert_month_confirm: "לאשר סגירת חודש?\nהנתונים יועברו לארכיון, מדדים תפעוליים יאופסו, ופרופילי סיכון יחושבו מחדש.", alert_month_ok: "הנתונים החודשיים עובדו ונשמרו בארכיון בהצלחה.", lbl_error: "רישום חריגה", lbl_count: "ציין כמות:", placeholder_count: "למשל 2", lbl_empty_db: "-- מסד הנתונים ריק --", lbl_empty_history: "אין רשומות היסטוריות זמינות.", stat_done: "נפח כולל:", stat_risk: "סיכון מוערך:", stat_test: "נבחר לביקורת:", dbl_click_hint: "הערה: לחיצה כפולה על שורה תציג תרשימים אנליטיים מפורטים.", profile_title: "פרופיל אנליטי: %name%", btn_toggle_global: "הצג ממוצעי מתקן", current_month: "נוכחי", chart_avg_cages: "תפוקה (עובד)", chart_err_rate: "שיעור שגיאות (עובד) %", chart_global_avg: "תפוקה (ממוצע מתקן)", chart_global_err: "שיעור שגיאות (ממוצע מתקן) %", done_blocked: "(כבר עובד)"
+            tab_audit: "ביקורת", tab_coverage: "כיסוי", tab_stats: "סטטיסטיקה", tab_data: "ארכיון", tab_settings: "כוח אדם", select_worker: "בחר עובד לביקורת:", done_cages: "פריטים להערכה:", btn_generate: "הפק מדגם ביקורת", cages_to_test: "פריטים שנבחרו לבדיקה פיזית:", click_error: "סמן חריגות שאומתו:", btn_save_audit: "שמור תוצאות ביקורת", stats_title: "מדדי ביצועים חודשיים", stats_formula: "חישוב שיעור שגיאות: (שגיאות / סך הכל) × 100", btn_close_month: "סגור חודש פיננסי", th_name: "עובד", th_cages: "נפח כולל", th_shifts: "ימים פעילים", th_avg: "ממוצע יומי", th_errors: "חריגות", th_error_rate: "שיעור שגיאות (%)", th_risk: "פרופיל סיכון", data_title: "ארכיון נתוני מערכת", subtab_history: "דוחות חודשיים", subtab_alltime: "סטטיסטיקה גלובלית", history_desc: "רשומות ביצועים מקובצות לפי תקופות דיווח.", alltime_desc: "נתונים מצטברים לכל תקופת ההעסקה הרשומה.", th_cages_all: "נפח (כל הזמנים)", th_shifts_all: "ימים (כל הזמנים)", th_errors_all: "שגיאות (כל הזמנים)", th_error_rate_all: "שיעור שגיאות כולל", settings_title: "ניהול כוח אדם", placeholder_name: "שם מלא", btn_add_worker: "רשום במערכת", th_risk_set: "סיכון מוקצה", th_action: "ניהול", alert_no_worker: "אנא ציין פרופיל עובד.", alert_no_cage: "אנא בחר לפחות פריט אחד לניתוח.", alert_no_count: "אנא ספק כמות מדויקת לקטגוריה:", alert_saved_err: "רשומה נשמרה. לעובד %name% נרשמו %err% חריגות.", alert_saved_ok: "רשומה נשמרה. הביקורת עבור %name% הסתיימה ללא חריגות.", alert_add_ok: "פרופיל העובד נוצר בהצלחה.", alert_del_confirm: "האם למחוק באופן בלתי הפיך את הפרופיל: %name%?\nגם בקשות ממתינות יימחקו.", alert_month_confirm: "לאשר סגירת חודש?\nהנתונים יועברו לארכיון, מדדים תפעוליים יאופסו, ופרופילי סיכון יחושבו מחדש.", alert_month_ok: "הנתונים החודשיים עובדו ונשמרו בארכיון בהצלחה.", lbl_error: "רישום חריגה", lbl_count: "ציין כמות:", placeholder_count: "למשל 2", lbl_empty_db: "-- מסד הנתונים ריק --", lbl_empty_history: "אין רשומות היסטוריות זמינות.", stat_done: "נפח כולל:", stat_risk: "סיכון מוערך:", stat_test: "נבחר לביקורת:", dbl_click_hint: "הערה: לחיצה כפולה על שורה תציג תרשימים אנליטיים מפורטים.", profile_title: "פרופיל אנליטי: %name%", btn_toggle_global: "הצג ממוצעי מתקן", current_month: "נוכחי", chart_avg_cages: "תפוקה (עובד)", chart_err_rate: "שיעור שגיאות (עובד) %", chart_global_avg: "תפוקה (ממוצע מתקן)", chart_global_err: "שיעור שגיאות (ממוצע מתקן) %", done_blocked: "כבר עובד", refill_badge: "מלא באופן שוטף!", audited_badge: "כבר נבדק השבוע", edit_prompt: "הזן שם עובד חדש:", cov_title: "כיסוי ביקורות (שבועי)", cov_desc: "סקירה של קטגוריות שנבדקו השבוע.", btn_cov_reset: "איפוס כיסוי שבועי", cov_reset_confirm: "לנקות היסטוריית ביקורות לשבוע זה?"
         }
     };
 
-    // --- STRUCTURE ---
+    // --- STRUCTURE WITH FREQUENCIES (days) ---
     const cageCategories = [
-        { id: "vyziva", type: "standard", names: { cs: "Dětská výživa", en: "Baby food", ru: "Детское питание", he: "מזון לתינוקות" } },
-        { id: "slehacky", type: "standard", names: { cs: "Šlehačky a ledové kávy", en: "Whipped creams & Iced coffees", ru: "Сливки и айс-кофе", he: "קצפות וקפה קר" } },
-        { id: "praci", type: "standard", names: { cs: "Prací prostředky", en: "Laundry detergents", ru: "Средства для стирки", he: "אבקות כביסה" } },
-        { id: "uklid", type: "standard", names: { cs: "Úklidové prostředky", en: "Cleaning supplies", ru: "Средства для уборки", he: "חומרי ניקוי" } },
-        { id: "intimni", type: "standard", names: { cs: "Intimní hygiena", en: "Intimate hygiene", ru: "Интимная гигиена", he: "היגיינה אינטימית" } },
-        { id: "osobni", type: "standard", names: { cs: "Osobní hygiena", en: "Personal hygiene", ru: "Личная гигиена", he: "היגיינה אישית" } },
-        { id: "nonfood", type: "standard", names: { cs: "NonFood", en: "Non-Food", ru: "Непродовольственные", he: "מוצרים שאינם מזון" } },
-        { id: "zradlo", type: "standard", names: { cs: "Zvířecí žrádlo", en: "Pet food", ru: "Корм для животных", he: "מזון לחיות מחמד" } },
-        { id: "testoviny", type: "number", names: { cs: "Těstoviny", en: "Pasta", ru: "Макароны", he: "פסטה" } },
-        { id: "cerealie", type: "number", names: { cs: "Cereálie", en: "Cereals", ru: "Хлопья", he: "דגני בוקר" } },
-        { id: "sterilka", type: "sub", names: { cs: "Sterilka", en: "Canned goods", ru: "Консервы", he: "שימורים" }, subs: { cs: ["Ryby", "Konzervy", "Okurky"], en: ["Fish", "Cans", "Pickles"], ru: ["Рыба", "Банки", "Огурцы"], he: ["דגים", "קופסאות שימורים", "חמוצים"] } },
-        { id: "kecupy", type: "standard", names: { cs: "Kečupy a omáčky", en: "Ketchups & Sauces", ru: "Кетчупы и соусы", he: "קטשופ ורטבים" } },
-        { id: "marmelady", type: "standard", names: { cs: "Marmelády a medy", en: "Jams & Honeys", ru: "Джемы и мед", he: "ריבות ודבש" } },
-        { id: "koreni", type: "standard", names: { cs: "Koření", en: "Spices", ru: "Специи", he: "תבלינים" } },
-        { id: "susenky", type: "sub", names: { cs: "Sušenky", en: "Cookies & Sweets", ru: "Печенье и сладости", he: "עוגיות וממתקים" }, subs: { cs: ["Čokolády", "Sušenky klasické", "Gumové bonbony"], en: ["Chocolates", "Classic cookies", "Gummy bears"], ru: ["Шоколад", "Обычное печенье", "Мармелад"], he: ["שוקולדים", "עוגיות רגילות", "סוכריות גומי"] } },
-        { id: "mouky", type: "number", names: { cs: "Mouky a cukry", en: "Flours & Sugars", ru: "Мука и сахар", he: "קמח וסוכר" } },
-        { id: "prasky", type: "standard", names: { cs: "Prášky na pečení", en: "Baking powders", ru: "Разрыхлители", he: "אבקות אפייה" } },
-        { id: "caje", type: "standard", names: { cs: "Čaje", en: "Teas", ru: "Чаи", he: "תה" } },
-        { id: "kavy", type: "number", names: { cs: "Kávy", en: "Coffees", ru: "Кофе", he: "קפה" } },
-        { id: "bio", type: "standard", names: { cs: "BIO výrobky", en: "BIO products", ru: "БИО продукты", he: "מוצרי ביו" } },
-        { id: "mezinarodni", type: "standard", names: { cs: "Mezinárodní zboží", en: "International goods", ru: "Международные товары", he: "מוצרים בינלאומיים" } },
-        { id: "oleje", type: "standard", names: { cs: "Oleje", en: "Oils", ru: "Масла", he: "שמנים" } },
-        { id: "bramburky", type: "standard", names: { cs: "Brambůrky", en: "Chips", ru: "Чипсы", he: "חטיפים/צ'יפס" } }
+        { id: "vyziva", freq: 2, type: "standard", names: { cs: "Dětská výživa", en: "Baby food", ru: "Детское питание", he: "מזון לתינוקות" } },
+        { id: "slehacky", freq: 2, type: "standard", names: { cs: "Šlehačky a ledové kávy", en: "Whipped creams & Iced coffees", ru: "Сливки и айс-кофе", he: "קצפות וקפה קר" } },
+        { id: "praci", freq: 3, type: "standard", names: { cs: "Prací prostředky", en: "Laundry detergents", ru: "Средства для стирки", he: "אבקות כביסה" } },
+        { id: "uklid", freq: 3, type: "standard", names: { cs: "Úklidové prostředky", en: "Cleaning supplies", ru: "Средства для уборки", he: "חומרי ניקוי" } },
+        { id: "intimni", freq: 3, type: "standard", names: { cs: "Intimní hygiena", en: "Intimate hygiene", ru: "Интимная гигиена", he: "היגיינה אינטימית" } },
+        { id: "plenky", freq: 3, type: "standard", names: { cs: "Plenky a dětská hygiena", en: "Diapers & Baby hygiene", ru: "Подгузники и дет. гигиена", he: "חיתולים והיגיינת תינוקות" } },
+        { id: "nonfood", freq: 3, type: "standard", names: { cs: "NonFood", en: "Non-Food", ru: "Непродовольственные", he: "מוצרים שאינם מזון" } },
+        { id: "zradlo", freq: 3, type: "standard", names: { cs: "Zvířecí žrádlo", en: "Pet food", ru: "Корм для животных", he: "מזון לחיות מחמד" } },
+        { id: "testoviny", freq: 2, type: "number", names: { cs: "Těstoviny", en: "Pasta", ru: "Макароны", he: "פסטה" } },
+        { id: "cerealie", freq: 2, type: "number", names: { cs: "Cereálie", en: "Cereals", ru: "Хлопья", he: "דגני בוקר" } },
+        { id: "sterilka", freq: 2, type: "sub", names: { cs: "Sterilka", en: "Canned goods", ru: "Консервы", he: "שימורים" }, subs: { cs: ["Ryby", "Konzervy", "Okurky"], en: ["Fish", "Cans", "Pickles"], ru: ["Рыба", "Банки", "Огурцы"], he: ["דגים", "קופסאות שימורים", "חמוצים"] } },
+        { id: "kecupy", freq: 2, type: "standard", names: { cs: "Kečupy a omáčky", en: "Ketchups & Sauces", ru: "Кетчупы и соусы", he: "קטשופ ורטבים" } },
+        { id: "marmelady", freq: 2, type: "standard", names: { cs: "Marmelády a medy", en: "Jams & Honeys", ru: "Джемы и мед", he: "ריבות ודבש" } },
+        { id: "koreni", freq: 2, type: "standard", names: { cs: "Koření", en: "Spices", ru: "Специи", he: "תבלינים" } },
+        { id: "suche_plody", freq: 2, type: "standard", names: { cs: "Suché plody a ořechy", en: "Dry fruits & nuts", ru: "Сухофрукты и орехи", he: "פירות יבשים ואגוזים" } },
+        { id: "susenky", freq: 2, type: "sub", names: { cs: "Sušenky", en: "Cookies & Sweets", ru: "Печенье и сладости", he: "עוגיות וממתקים" }, subs: { cs: ["Čokolády", "Sušenky klasické", "Gumové bonbony"], en: ["Chocolates", "Classic cookies", "Gummy bears"], ru: ["Шоколад", "Обычное печенье", "Мармелад"], he: ["שוקולדים", "עוגיות רגילות", "סוכריות גומי"] } },
+        { id: "mouky", freq: 1, type: "number", names: { cs: "Mouky a cukry", en: "Flours & Sugars", ru: "Мука и сахар", he: "קמח וסוכר" } },
+        { id: "prasky", freq: 2, type: "standard", names: { cs: "Prášky na pečení", en: "Baking powders", ru: "Разрыхлители", he: "אבקות אפייה" } },
+        { id: "caje", freq: 2, type: "standard", names: { cs: "Čaje", en: "Teas", ru: "Чаи", he: "תה" } },
+        { id: "kavy", freq: 2, type: "number", names: { cs: "Kávy", en: "Coffees", ru: "Кофе", he: "קפה" } },
+        { id: "bio", freq: 2, type: "standard", names: { cs: "BIO výrobky", en: "BIO products", ru: "БИО продукты", he: "מוצרי ביו" } },
+        { id: "mezinarodni", freq: 2, type: "standard", names: { cs: "Mezinárodní zboží", en: "International goods", ru: "Международные товары", he: "מוצרים בינלאומיים" } },
+        { id: "oleje", freq: 1, type: "standard", names: { cs: "Oleje", en: "Oils", ru: "Масла", he: "שמנים" } },
+        { id: "toaletni", freq: 1, special: "refill", type: "standard", names: { cs: "Toaletní papír", en: "Toilet paper", ru: "Туалетная бумага", he: "נייר טואלט" } },
+        { id: "mleko", freq: 1, special: "refill", type: "standard", names: { cs: "Trvanlivé mléko", en: "Long-life milk", ru: "Молоко длит. хранения", he: "חלב עמיד" } },
+        { id: "bramburky", freq: 1, type: "standard", names: { cs: "Brambůrky", en: "Chips", ru: "Чипсы", he: "חטיפים/צ'יפס" } }
     ];
 
     let currentLang = localStorage.getItem('kolos_lang') || 'cs';
@@ -444,6 +524,7 @@
         updateLangDropdownUI(lang);
         renderWorkerSelect(); renderEmpWho(); renderQueue();
         renderCages('emp-cages-list', true); renderCages('tl-cages-list', false);
+        renderCoverage();
         renderStats(); renderAllTimeStats(); renderHistory();
     }
 
@@ -454,8 +535,8 @@
     firebase.initializeApp(firebaseConfig); const db = firebase.database();
 
     // --- STATE VARIABLES ---
-    let workers = []; let historyData = []; let pendingAudits = {}; let completedCages = {};
-    let currentAuditWorkerId = null; let currentAuditCagesCount = 0; let currentPendingAuditId = null;
+    let workers = []; let historyData = []; let pendingAudits = {}; let completedCages = {}; let auditedThisWeek = {};
+    let currentAuditWorkerId = null; let currentAuditCagesCount = 0; let currentPendingAuditId = null; let currentLockedSample = [];
     let profileChartInstance = null; let isGlobalStatsVisible = false; let currentProfileWorkerId = null;
     const riskRates = { 'low': 0.10, 'medium': 0.30, 'high': 0.50 };
 
@@ -473,11 +554,22 @@
     db.ref('pendingAudits').on('value', snap => { pendingAudits = snap.val() || {}; renderQueue(); });
     db.ref('completedCages').on('value', snap => { 
         completedCages = snap.val() || {}; 
-        if (document.getElementById('screen-emp').classList.contains('active-screen')) renderCages('emp-cages-list', true);
+        if (document.getElementById('screen-emp').classList.contains('active-screen')) {
+            renderCages('emp-cages-list', true);
+            loadEmpDraft();
+        }
     });
+    db.ref('auditedThisWeek').on('value', snap => { auditedThisWeek = snap.val() || {}; renderCoverage(); });
 
     // --- NAVIGATION & AUTH ---
-    function init() { changeLanguage(currentLang); setupCustomLangDropdown(); }
+    function init() { 
+        changeLanguage(currentLang); 
+        setupCustomLangDropdown(); 
+        
+        // Emp draft autosave listeners
+        document.getElementById('emp-cages-list').addEventListener('change', saveEmpDraft);
+        document.getElementById('emp-cages-list').addEventListener('input', saveEmpDraft);
+    }
 
     function setupCustomLangDropdown() {
         const langCurrent = document.getElementById("lang-current");
@@ -494,7 +586,7 @@
     function showScreen(screenId) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
         document.getElementById(screenId).classList.add('active-screen');
-        if(screenId === 'screen-emp') renderCages('emp-cages-list', true);
+        if(screenId === 'screen-emp') { renderCages('emp-cages-list', true); loadEmpDraft(); }
         if(screenId === 'screen-tl-dash') renderCages('tl-cages-list', false);
     }
 
@@ -510,13 +602,6 @@
         document.getElementById('sec-' + tab).classList.add('active'); document.getElementById('tab-' + tab).classList.add('active');
     }
 
-    function switchDataSubTab(subTab) {
-        document.getElementById('view-history').style.display = subTab === 'history' ? 'block' : 'none';
-        document.getElementById('view-alltime').style.display = subTab === 'alltime' ? 'block' : 'none';
-        document.getElementById('subtab-history').classList.toggle('active', subTab === 'history');
-        document.getElementById('subtab-alltime').classList.toggle('active', subTab === 'alltime');
-    }
-
     function setAuditMode(mode) {
         document.getElementById('mode-auto-btn').classList.toggle('active', mode==='auto');
         document.getElementById('mode-manual-btn').classList.toggle('active', mode==='manual');
@@ -526,6 +611,14 @@
     }
 
     // --- CAGE RENDERING & HELPERS ---
+    function isCageBlocked(blockKey, freqDays) {
+        let timestamp = completedCages[blockKey];
+        if(!timestamp) return false;
+        let elapsed = Date.now() - timestamp;
+        let required = freqDays * 24 * 3600 * 1000;
+        return elapsed < required;
+    }
+
     function getCageNameById(id) { let cat = cageCategories.find(c => c.id === id); return cat ? cat.names[currentLang] : id; }
 
     function renderEmpWho() {
@@ -533,7 +626,7 @@
         if(workers.length === 0) return;
         s.innerHTML = `<option value="">-- Výběr / Select / Выбор / בחר --</option>`;
         workers.forEach(w => s.innerHTML += `<option value="${w.id}">${w.name}</option>`);
-        if(cur && workers.find(w=>w.id===cur)) s.value = cur;
+        if(cur && workers.find(w=>w.id===cur)) { s.value = cur; loadEmpDraft(); }
     }
 
     function renderWorkerSelect() {
@@ -555,27 +648,29 @@
         const grid = document.getElementById(containerId); grid.innerHTML = '';
         cageCategories.forEach((cat) => {
             let catName = cat.names[currentLang];
-            let isCatBlocked = completedCages[cat.id] ? true : false;
+            let specialBadge = (cat.special === "refill") ? ` <span class="badge medium" style="margin-left:10px; font-size:11px; padding:3px 8px;">${t('refill_badge')}</span>` : "";
             
             if (cat.type === 'standard') {
-                let dis = (isCatBlocked && isEmpMode) ? "disabled" : "";
-                let bg = (isCatBlocked && isEmpMode) ? "opacity:0.5; background:#eee;" : "";
-                let info = (isCatBlocked && isEmpMode) ? ` &nbsp;<span style="font-size:13px; color:var(--text-muted);">${t('done_blocked')}</span>` : "";
-                grid.innerHTML += `<div class="cage-wrapper" style="${bg}"><label class="cage-item"><input type="checkbox" value="${cat.id}" class="cage-checkbox standard-cage" ${dis}><span>${catName}</span>${info}</label></div>`;
+                let isCatBlocked = isEmpMode ? isCageBlocked(cat.id, cat.freq) : false;
+                let dis = isCatBlocked ? "disabled" : "";
+                let bg = isCatBlocked ? "opacity:0.6; background:#f9f9f9;" : "";
+                let info = isCatBlocked ? ` &nbsp;<span style="font-size:13px; color:var(--text-muted);">${t('done_blocked')}</span>` : "";
+                grid.innerHTML += `<div class="cage-wrapper" style="${bg}"><label class="cage-item"><input type="checkbox" value="${cat.id}" data-id="${cat.id}" class="cage-checkbox standard-cage" ${dis}><span>${catName}</span>${specialBadge}${info}</label></div>`;
             } else if (cat.type === 'sub') {
                 let subsArray = cat.subs[currentLang]; let origSubsArray = cat.subs['cs'];
                 let subsHtml = subsArray.map((sub, idx) => {
                     let subId = cat.id + "-" + origSubsArray[idx];
-                    let sDis = (completedCages[subId] && isEmpMode) ? "disabled" : "";
-                    let sStyle = (completedCages[subId] && isEmpMode) ? "color:#ccc; text-decoration:line-through;" : "";
+                    let sDis = (isEmpMode && isCageBlocked(subId, cat.freq)) ? "disabled" : "";
+                    let sStyle = (isEmpMode && isCageBlocked(subId, cat.freq)) ? "color:#ccc; text-decoration:line-through;" : "";
                     return `<label style="${sStyle}"><input type="checkbox" value="${origSubsArray[idx]}" data-parent="${cat.id}" class="cage-checkbox sub-cage" ${sDis}> ${sub}</label>`;
                 }).join('');
-                grid.innerHTML += `<div class="cage-wrapper"><label class="cage-item" style="margin-bottom:0;"><input type="checkbox" onchange="document.getElementById('exp_${cat.id}_${containerId}').style.display = this.checked ? 'block' : 'none'"><span>${catName} ▾</span></label><div id="exp_${cat.id}_${containerId}" class="expand-box">${subsHtml}</div></div>`;
+                grid.innerHTML += `<div class="cage-wrapper"><label class="cage-item" style="margin-bottom:0;"><input type="checkbox" onchange="document.getElementById('exp_${cat.id}_${containerId}').style.display = this.checked ? 'block' : 'none'"><span>${catName} ▾</span>${specialBadge}</label><div id="exp_${cat.id}_${containerId}" class="expand-box">${subsHtml}</div></div>`;
             } else if (cat.type === 'number') {
-                let dis = (isCatBlocked && isEmpMode) ? "disabled" : "";
-                let bg = (isCatBlocked && isEmpMode) ? "opacity:0.5; background:#eee;" : "";
-                let info = (isCatBlocked && isEmpMode) ? ` &nbsp;<span style="font-size:13px; color:var(--text-muted);">${t('done_blocked')}</span>` : "";
-                grid.innerHTML += `<div class="cage-wrapper" style="${bg}"><label class="cage-item" style="margin-bottom:0;"><input type="checkbox" ${dis} onchange="document.getElementById('exp_${cat.id}_${containerId}').style.display = this.checked ? 'block' : 'none'; if(!this.checked) document.getElementById('num_${cat.id}_${containerId}').value = '';"><span>${catName} ▾</span>${info}</label><div id="exp_${cat.id}_${containerId}" class="expand-box"><label style="font-size: 14px; margin-bottom: 5px;">${t('lbl_count')}</label><input type="number" id="num_${cat.id}_${containerId}" data-id="${cat.id}" class="cage-number" min="1" placeholder="${t('placeholder_count')}" ${dis}></div></div>`;
+                let isCatBlocked = isEmpMode ? isCageBlocked(cat.id, cat.freq) : false;
+                let dis = isCatBlocked ? "disabled" : "";
+                let bg = isCatBlocked ? "opacity:0.6; background:#f9f9f9;" : "";
+                let info = isCatBlocked ? ` &nbsp;<span style="font-size:13px; color:var(--text-muted);">${t('done_blocked')}</span>` : "";
+                grid.innerHTML += `<div class="cage-wrapper" style="${bg}"><label class="cage-item" style="margin-bottom:0;"><input type="checkbox" ${dis} onchange="document.getElementById('exp_${cat.id}_${containerId}').style.display = this.checked ? 'block' : 'none'; if(!this.checked) { let el = document.getElementById('num_${cat.id}_${containerId}'); if(el) el.value = ''; }"><span>${catName} ▾</span>${specialBadge}${info}</label><div id="exp_${cat.id}_${containerId}" class="expand-box"><label style="font-size: 14px; margin-bottom: 5px;">${t('lbl_count')}</label><input type="number" id="num_${cat.id}_${containerId}" data-id="${cat.id}" class="cage-number" min="1" placeholder="${t('placeholder_count')}" ${dis}></div></div>`;
             }
         });
     }
@@ -598,7 +693,51 @@
         return { doneCages: done, errorMsg: err };
     }
 
-    // --- EMPLOYEE LOGIC ---
+    // --- EMPLOYEE DRAFTS & SUBMIT ---
+    function saveEmpDraft() {
+        const workerId = document.getElementById('emp-who').value;
+        if(!workerId) return;
+        let draft = { standards: [], subs: [], numbers: {} };
+        const grid = document.getElementById('emp-cages-list');
+        grid.querySelectorAll('.standard-cage:checked').forEach(cb => draft.standards.push(cb.value));
+        grid.querySelectorAll('.sub-cage:checked').forEach(cb => draft.subs.push(cb.getAttribute('data-parent') + "-" + cb.value));
+        grid.querySelectorAll('.cage-number').forEach(input => {
+            if(input.closest('.cage-wrapper').querySelector('.cage-item input').checked) {
+                draft.numbers[input.getAttribute('data-id')] = input.value;
+            }
+        });
+        localStorage.setItem('kolos_draft_' + workerId, JSON.stringify(draft));
+    }
+
+    function loadEmpDraft() {
+        const workerId = document.getElementById('emp-who').value;
+        if(!workerId) return;
+        const draftStr = localStorage.getItem('kolos_draft_' + workerId);
+        if(!draftStr) { renderCages('emp-cages-list', true); return; }
+        const draft = JSON.parse(draftStr);
+        const grid = document.getElementById('emp-cages-list');
+        
+        grid.querySelectorAll('.standard-cage').forEach(cb => { if(!cb.disabled && draft.standards.includes(cb.value)) cb.checked = true; });
+        grid.querySelectorAll('.sub-cage').forEach(cb => {
+            let id = cb.getAttribute('data-parent') + "-" + cb.value;
+            if(!cb.disabled && draft.subs.includes(id)) {
+                cb.checked = true;
+                let exp = document.getElementById('exp_' + cb.getAttribute('data-parent') + '_emp-cages-list');
+                if(exp) exp.style.display = 'block';
+                cb.closest('.cage-wrapper').querySelector('.cage-item input').checked = true;
+            }
+        });
+        grid.querySelectorAll('.cage-number').forEach(input => {
+            let id = input.getAttribute('data-id');
+            if(!input.disabled && draft.numbers[id]) {
+                input.value = draft.numbers[id];
+                let wrapper = input.closest('.cage-wrapper');
+                wrapper.querySelector('.cage-item input').checked = true;
+                wrapper.querySelector('.expand-box').style.display = 'block';
+            }
+        });
+    }
+
     function submitEmp() {
         const workerId = document.getElementById('emp-who').value;
         if(!workerId) return alert(t('alert_no_worker'));
@@ -610,16 +749,18 @@
         if(!confirm(t('emp_confirm_submit'))) return;
 
         let updates = {};
-        doneCages.forEach(c => { updates['completedCages/' + c.id] = true; }); 
+        doneCages.forEach(c => { updates['completedCages/' + c.id] = Date.now(); }); 
         db.ref().update(updates);
-        db.ref('pendingAudits').push({ workerId: workerId, timestamp: new Date().getTime(), cages: doneCages });
+        db.ref('pendingAudits').push({ workerId: workerId, timestamp: Date.now(), cages: doneCages });
+
+        localStorage.removeItem('kolos_draft_' + workerId);
 
         alert(t('emp_success'));
         document.querySelectorAll('#emp-cages-list input[type="checkbox"]').forEach(cb => { cb.checked=false; cb.dispatchEvent(new Event('change')); });
         showScreen('screen-auth');
     }
 
-    // --- TL AUDIT LOGIC ---
+    // --- TL AUDIT & QUEUE ---
     function toggleDetails(id, elem) {
         let ul = document.getElementById('details-' + id);
         if(ul.style.display === 'none') { ul.style.display = 'block'; elem.innerText = t('hide_details'); } 
@@ -636,7 +777,7 @@
             if(item.cages) {
                 item.cages.forEach(c => { 
                     totalPhysical += c.isNumber ? c.count : 1; 
-                    detailsHtml += `<li><img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/2705.svg" class="emoji-icon" style="width:14px; height:14px; margin-right:5px;" alt="check"> ${c.displayBase} ${c.isNumber ? `(x${c.count})` : ''}</li>`;
+                    detailsHtml += `<li><svg class="svg-icon" style="width:14px; height:14px; margin-right:6px; color:var(--primary);"><use href="#icon-check"></use></svg> ${c.displayBase} ${c.isNumber ? `(x${c.count})` : ''}</li>`;
                 });
             }
 
@@ -644,14 +785,20 @@
             <div class="queue-card">
                 <div class="queue-header">
                     <div><h4>${wName}</h4><p>${t('cages_count').replace('%count%', totalPhysical)}</p></div>
-                    <div style="display:flex; gap:10px;">
-                        <button class="btn" onclick="startAutoAudit('${key}')"><img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/1f50d.svg" class="emoji-icon" alt="search"> ${t('btn_check')}</button>
-                        <button class="btn btn-secondary" style="background:var(--high);" onclick="cancelPendingAudit('${key}')"><img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/274c.svg" class="emoji-icon" alt="close"> ${t('btn_cancel')}</button>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <button class="btn" onclick="startAutoAudit('${key}')"><svg class="svg-icon" style="fill:white;"><use href="#icon-search"></use></svg> ${t('btn_check')}</button>
+                        <div class="kebab-menu">
+                            <button class="kebab-btn">⋮</button>
+                            <div class="kebab-content">
+                                <a onclick="regenerateSample('${key}')"><svg class="svg-icon" style="width:14px;height:14px;margin-right:8px;"><use href="#icon-refresh"></use></svg> ${t('btn_regen')}</a>
+                                <a onclick="cancelPendingAudit('${key}')" style="color:var(--high);"><svg class="svg-icon" style="width:14px;height:14px;margin-right:8px;fill:var(--high);"><use href="#icon-close"></use></svg> ${t('btn_cancel')}</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div style="margin-top: 15px; width: 100%;">
                     <span style="color: var(--primary); cursor: pointer; font-size: 14px;" onclick="toggleDetails('${key}', this)">${t('show_details')}</span>
-                    <ul id="details-${key}" style="display: none; margin-top: 10px; padding-left: 0; list-style: none; font-size: 15px; color: var(--text-muted); margin-bottom: 0;">
+                    <ul id="details-${key}" style="display: none; margin-top: 10px; padding-left: 0; list-style: none; font-size: 15px; color: var(--text-main); margin-bottom: 0;">
                         ${detailsHtml}
                     </ul>
                 </div>
@@ -675,7 +822,22 @@
         const item = pendingAudits[key]; const worker = workers.find(w => w.id === item.workerId);
         if(!worker) return alert(t('alert_no_worker'));
         currentPendingAuditId = key;
-        processSampleGeneration(worker, item.cages);
+        
+        if (item.lockedSample) {
+            displaySampleView(worker, item.lockedSample);
+        } else {
+            let sample = generateSmartSample(worker, item.cages);
+            db.ref('pendingAudits/' + key + '/lockedSample').set(sample);
+            displaySampleView(worker, sample);
+        }
+    }
+
+    function regenerateSample(key) {
+        const item = pendingAudits[key]; const worker = workers.find(w => w.id === item.workerId);
+        if(!worker) return;
+        let sample = generateSmartSample(worker, item.cages);
+        db.ref('pendingAudits/' + key + '/lockedSample').set(sample);
+        if(currentPendingAuditId === key) displaySampleView(worker, sample);
     }
 
     function generateSampleManual() {
@@ -687,23 +849,42 @@
         if(errorMsg) return alert(errorMsg); if(doneCages.length === 0) return alert(t('alert_no_cage'));
 
         currentPendingAuditId = null;
-        processSampleGeneration(worker, doneCages);
+        let sample = generateSmartSample(worker, doneCages);
+        displaySampleView(worker, sample);
     }
 
-    function processSampleGeneration(worker, submittedCages) {
-        let samplePool = [];
+    function generateSmartSample(worker, submittedCages) {
+        let uniqueCages = [];
         submittedCages.forEach(c => {
-            if(c.isNumber) { for(let i=1; i<=c.count; i++) samplePool.push({ id: c.id+"_"+i, display: c.displayBase + " ("+i+")" }); }
-            else { samplePool.push({ id: c.id, display: c.displayBase }); }
+            let idToCheck = c.isNumber ? c.id : c.id; 
+            let disp = c.isNumber ? getCageNameById(c.id) : c.displayBase;
+            if (!uniqueCages.find(x => x.id === idToCheck)) {
+                uniqueCages.push({ id: idToCheck, display: disp, physicalCount: c.isNumber ? c.count : 1 });
+            }
+        });
+        
+        currentAuditCagesCount = 0;
+        uniqueCages.forEach(x => currentAuditCagesCount += x.physicalCount);
+        
+        uniqueCages.sort((a, b) => {
+            let aAud = auditedThisWeek[a.id] ? 1 : 0;
+            let bAud = auditedThisWeek[b.id] ? 1 : 0;
+            return aAud - bAud;
         });
 
-        currentAuditCagesCount = samplePool.length; currentAuditWorkerId = worker.id;
-        const rate = riskRates[worker.risk]; let sampleSize = Math.ceil(samplePool.length * rate);
-        const shuffled = samplePool.sort(() => 0.5 - Math.random()); const selectedSample = shuffled.slice(0, sampleSize);
+        const rate = riskRates[worker.risk]; let sampleSize = Math.ceil(uniqueCages.length * rate);
+        return uniqueCages.slice(0, sampleSize);
+    }
 
+    function displaySampleView(worker, sampleArr) {
+        currentAuditWorkerId = worker.id;
+        currentLockedSample = sampleArr;
         const resBox = document.getElementById('result-box'); const list = document.getElementById('sample-list'); list.innerHTML = '';
-        selectedSample.forEach(item => { list.innerHTML += `<li class="audit-item"><span><img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/1f4e6.svg" class="emoji-icon" alt="box"> ${item.display}</span><label><input type="checkbox" class="error-checkbox"> ${t('lbl_error')}</label></li>`; });
-        document.getElementById('sample-stats').innerHTML = `${t('stat_done')} <strong>${samplePool.length}</strong> | ${t('stat_risk')} <strong>${worker.risk.toUpperCase()}</strong> | ${t('stat_test')} <strong>${sampleSize}</strong>`;
+        sampleArr.forEach(item => { 
+            let auditedNote = auditedThisWeek[item.id] ? ` <span class="badge low" style="font-size:11px; margin-left:8px;">${t('audited_badge')}</span>` : '';
+            list.innerHTML += `<li class="audit-item"><span><svg class="svg-icon"><use href="#icon-box"></use></svg> ${item.display}${auditedNote}</span><label><input type="checkbox" class="error-checkbox" value="${item.id}"> ${t('lbl_error')}</label></li>`; 
+        });
+        document.getElementById('sample-stats').innerHTML = `${t('stat_done')} <strong>${currentAuditCagesCount}</strong> | ${t('stat_risk')} <strong>${worker.risk.toUpperCase()}</strong> | ${t('stat_test')} <strong>${sampleArr.length}</strong>`;
         resBox.style.display = 'block'; resBox.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
 
@@ -711,11 +892,19 @@
         const workerId = currentAuditWorkerId; const worker = workers.find(w => w.id === workerId);
         const errorsCount = document.querySelectorAll('.error-checkbox:checked').length;
         
-        db.ref('workers/' + workerId).update({
-            totalCages: (worker.totalCages || 0) + currentAuditCagesCount, errors: (worker.errors || 0) + errorsCount,
-            allTimeCages: (worker.allTimeCages || 0) + currentAuditCagesCount, allTimeErrors: (worker.allTimeErrors || 0) + errorsCount,
-            shifts: (worker.shifts || 0) + 1, allTimeShifts: (worker.allTimeShifts || 0) + 1
-        });
+        let updates = {};
+        updates['workers/' + workerId + '/totalCages'] = (worker.totalCages || 0) + currentAuditCagesCount;
+        updates['workers/' + workerId + '/errors'] = (worker.errors || 0) + errorsCount;
+        updates['workers/' + workerId + '/allTimeCages'] = (worker.allTimeCages || 0) + currentAuditCagesCount;
+        updates['workers/' + workerId + '/allTimeErrors'] = (worker.allTimeErrors || 0) + errorsCount;
+        updates['workers/' + workerId + '/shifts'] = (worker.shifts || 0) + 1;
+        updates['workers/' + workerId + '/allTimeShifts'] = (worker.allTimeShifts || 0) + 1;
+        
+        if(currentLockedSample) {
+            currentLockedSample.forEach(c => { updates['auditedThisWeek/' + c.id] = Date.now(); });
+        }
+
+        db.ref().update(updates);
         
         if(currentPendingAuditId) { db.ref('pendingAudits/' + currentPendingAuditId).remove(); currentPendingAuditId = null; }
         
@@ -725,9 +914,39 @@
         if (errorsCount > 0) alert(t('alert_saved_err').replace('%name%', worker.name).replace('%err%', errorsCount));
         else alert(t('alert_saved_ok').replace('%name%', worker.name));
         currentAuditCagesCount = 0;
+        currentLockedSample = [];
     }
 
     function resetKPICycle() { if(confirm(t('reset_kpi_confirm'))) { db.ref('completedCages').remove(); } }
+
+    // --- COVERAGE TAB ---
+    function renderCoverage() {
+        const grid = document.getElementById('coverage-grid');
+        if(!grid) return;
+        grid.innerHTML = '';
+        cageCategories.forEach(cat => {
+            if(cat.type === 'sub') {
+                cat.subs['cs'].forEach((sub, idx) => {
+                    let id = cat.id + "-" + sub;
+                    let isAud = auditedThisWeek[id];
+                    let icon = isAud ? '<svg class="svg-icon icon-success"><use href="#icon-check"></use></svg>' : '<svg class="svg-icon" style="opacity:0.2;"><use href="#icon-box"></use></svg>';
+                    let name = cat.names[currentLang] + " - " + cat.subs[currentLang][idx];
+                    grid.innerHTML += `<div class="cage-item" onclick="toggleManualAuditCov('${id}')" style="cursor:pointer; ${isAud ? 'border-color:var(--low); background:rgba(52,199,89,0.05);' : ''}">${icon} <span style="margin-left:10px;">${name}</span></div>`;
+                });
+            } else {
+                let isAud = auditedThisWeek[cat.id];
+                let icon = isAud ? '<svg class="svg-icon icon-success"><use href="#icon-check"></use></svg>' : '<svg class="svg-icon" style="opacity:0.2;"><use href="#icon-box"></use></svg>';
+                grid.innerHTML += `<div class="cage-item" onclick="toggleManualAuditCov('${cat.id}')" style="cursor:pointer; ${isAud ? 'border-color:var(--low); background:rgba(52,199,89,0.05);' : ''}">${icon} <span style="margin-left:10px;">${cat.names[currentLang]}</span></div>`;
+            }
+        });
+    }
+    function toggleManualAuditCov(id) {
+        if(auditedThisWeek[id]) db.ref('auditedThisWeek/' + id).remove();
+        else db.ref('auditedThisWeek/' + id).set(Date.now());
+    }
+    function resetCoverage() {
+        if(confirm(t('cov_reset_confirm'))) db.ref('auditedThisWeek').remove();
+    }
 
     // --- SETTINGS ---
     function addWorker() {
@@ -736,7 +955,18 @@
         db.ref('workers').push({ name: name, risk: risk, totalCages: 0, errors: 0, allTimeCages: 0, allTimeErrors: 0, shifts: 0, allTimeShifts: 0 });
         nameInput.value = ''; alert(t('alert_add_ok'));
     }
-    function removeWorker(id, name) { if (confirm(t('alert_del_confirm').replace('%name%', name))) db.ref('workers/' + id).remove(); }
+    function removeWorker(id, name) { 
+        if (confirm(t('alert_del_confirm').replace('%name%', name))) {
+            db.ref('workers/' + id).remove();
+            for(let key in pendingAudits) { if(pendingAudits[key].workerId === id) db.ref('pendingAudits/' + key).remove(); }
+        }
+    }
+    function editWorker(id, oldName) {
+        let newName = prompt(t('edit_prompt'), oldName);
+        if(newName && newName.trim() !== '') {
+            db.ref('workers/' + id).update({name: newName.trim()});
+        }
+    }
 
     function closeMonth() {
         if (!confirm(t('alert_month_confirm'))) return;
@@ -811,7 +1041,7 @@
         let rankedWorkers = workers.map(w => { return { ...w, errorRate: w.totalCages > 0 ? (w.errors / w.totalCages) * 100 : 0 }; }).sort((a, b) => a.errorRate - b.errorRate);
         rankedWorkers.forEach(w => {
             let errColor = w.errors > 0 ? 'var(--high)' : 'inherit'; let shifts = w.shifts || 0; let avg = shifts > 0 ? (w.totalCages / shifts).toFixed(1) : "0.0";
-            tbody.innerHTML += `<tr class="clickable" ondblclick="openProfile('${w.id}')"><td><strong>${w.name}</strong></td><td><img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/1f4e6.svg" class="emoji-icon" alt="box"> ${w.totalCages || 0}</td><td>${shifts}</td><td><strong>${avg}</strong></td><td style="color: ${errColor}; font-weight: 600;">${w.errors || 0}</td><td>${w.errorRate.toFixed(1)}%</td><td><span class="badge ${w.risk}">${w.risk.toUpperCase()}</span></td></tr>`;
+            tbody.innerHTML += `<tr class="clickable" ondblclick="openProfile('${w.id}')"><td><strong>${w.name}</strong></td><td><svg class="svg-icon"><use href="#icon-box"></use></svg> ${w.totalCages || 0}</td><td>${shifts}</td><td><strong>${avg}</strong></td><td style="color: ${errColor}; font-weight: 600;">${w.errors || 0}</td><td>${w.errorRate.toFixed(1)}%</td><td><span class="badge ${w.risk}">${w.risk.toUpperCase()}</span></td></tr>`;
         });
     }
 
@@ -820,7 +1050,7 @@
         let allTimeRanked = workers.map(w => { return { ...w, allTimeErrorRate: w.allTimeCages > 0 ? (w.allTimeErrors / w.allTimeCages) * 100 : 0 }; }).sort((a, b) => a.allTimeErrorRate - b.allTimeErrorRate); 
         allTimeRanked.forEach(w => {
             let errColor = w.allTimeErrors > 0 ? 'var(--high)' : 'inherit'; let shiftsAll = w.allTimeShifts || 0; let avgAll = shiftsAll > 0 ? (w.allTimeCages / shiftsAll).toFixed(1) : "0.0";
-            tbody.innerHTML += `<tr class="clickable" ondblclick="openProfile('${w.id}')"><td><strong>${w.name}</strong></td><td><img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/1f4e6.svg" class="emoji-icon" alt="box"> ${w.allTimeCages || 0}</td><td>${shiftsAll}</td><td><strong>${avgAll}</strong></td><td style="color: ${errColor}; font-weight: 600;">${w.allTimeErrors || 0}</td><td><strong>${w.allTimeErrorRate.toFixed(1)}%</strong></td></tr>`;
+            tbody.innerHTML += `<tr class="clickable" ondblclick="openProfile('${w.id}')"><td><strong>${w.name}</strong></td><td><svg class="svg-icon"><use href="#icon-box"></use></svg> ${w.allTimeCages || 0}</td><td>${shiftsAll}</td><td><strong>${avgAll}</strong></td><td style="color: ${errColor}; font-weight: 600;">${w.allTimeErrors || 0}</td><td><strong>${w.allTimeErrorRate.toFixed(1)}%</strong></td></tr>`;
         });
     }
 
@@ -828,11 +1058,11 @@
         const container = document.getElementById('history-container'); container.innerHTML = '';
         if (historyData.length === 0) { container.innerHTML = `<p style="color: var(--text-muted); font-size: 16px;">${t('lbl_empty_history')}</p>`; return; }
         historyData.forEach(record => {
-            let html = `<div class="history-card"><div class="history-header"><img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/1f4c5.svg" class="emoji-icon" alt="calendar"> ${record.month}</div><div class="table-responsive"><table class="stats-table"><thead><tr><th>${t('th_name')}</th><th>${t('th_cages')}</th><th>${t('th_shifts')}</th><th>${t('th_avg')}</th><th>${t('th_errors')}</th><th>${t('th_error_rate')}</th><th>${t('th_risk')}</th></tr></thead><tbody>`;
+            let html = `<div class="history-card"><div class="history-header"><svg class="svg-icon"><use href="#icon-calendar"></use></svg> ${record.month}</div><div class="table-responsive"><table class="stats-table"><thead><tr><th>${t('th_name')}</th><th>${t('th_cages')}</th><th>${t('th_shifts')}</th><th>${t('th_avg')}</th><th>${t('th_errors')}</th><th>${t('th_error_rate')}</th><th>${t('th_risk')}</th></tr></thead><tbody>`;
             let sortedWorkers = (record.workers || []).map(w => { w.errorRate = w.totalCages > 0 ? (w.errors / w.totalCages) * 100 : 0; return w; }).sort((a, b) => a.errorRate - b.errorRate);
             sortedWorkers.forEach(w => {
                 let errColor = w.errors > 0 ? 'var(--high)' : 'inherit'; let shifts = w.shifts || 0; let avg = shifts > 0 ? (w.totalCages / shifts).toFixed(1) : "0.0";
-                html += `<tr class="clickable" ondblclick="openProfile('${w.id}')"><td><strong>${w.name}</strong></td><td><img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/1f4e6.svg" class="emoji-icon" alt="box"> ${w.totalCages || 0}</td><td>${shifts}</td><td><strong>${avg}</strong></td><td style="color: ${errColor}; font-weight: 600;">${w.errors || 0}</td><td>${w.errorRate.toFixed(1)}%</td><td><span class="badge ${w.risk}">${w.risk.toUpperCase()}</span></td></tr>`;
+                html += `<tr class="clickable" ondblclick="openProfile('${w.id}')"><td><strong>${w.name}</strong></td><td><svg class="svg-icon"><use href="#icon-box"></use></svg> ${w.totalCages || 0}</td><td>${shifts}</td><td><strong>${avg}</strong></td><td style="color: ${errColor}; font-weight: 600;">${w.errors || 0}</td><td>${w.errorRate.toFixed(1)}%</td><td><span class="badge ${w.risk}">${w.risk.toUpperCase()}</span></td></tr>`;
             });
             html += `</tbody></table></div></div>`; container.innerHTML += html;
         });
@@ -840,7 +1070,7 @@
 
     function renderAdminWorkers() {
         const tbody = document.getElementById('admin-worker-list'); tbody.innerHTML = '';
-        workers.forEach(w => { tbody.innerHTML += `<tr><td><strong>${w.name}</strong></td><td><span class="badge ${w.risk}">${w.risk.toUpperCase()}</span></td><td style="text-align: right;"><button class="btn-icon" onclick="removeWorker('${w.id}', '${w.name}')"><img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/1f5d1.svg" class="emoji-icon" alt="trash"></button></td></tr>`; });
+        workers.forEach(w => { tbody.innerHTML += `<tr><td><strong>${w.name}</strong></td><td><span class="badge ${w.risk}">${w.risk.toUpperCase()}</span></td><td style="text-align: right;"><button class="btn-icon" onclick="editWorker('${w.id}', '${w.name}')"><svg class="svg-icon"><use href="#icon-edit"></use></svg></button><button class="btn-icon" onclick="removeWorker('${w.id}', '${w.name}')"><svg class="svg-icon"><use href="#icon-trash"></use></svg></button></td></tr>`; });
     }
 
     window.onload = init;
