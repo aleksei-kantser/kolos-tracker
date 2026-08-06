@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kološ Tracker - Enterprise Pro</title>
     
-    <!-- Firebase & Chart.js -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -168,7 +167,6 @@
             Kološ Tracker
         </h1>
         
-        <!-- Custom Language Selector -->
         <div class="custom-lang-switcher" id="custom-lang">
             <div class="select-selected" id="lang-current">
                 <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzIDIiPjxyZWN0IHdpZHRoPSIzIiBoZWlnaHQ9IjIiIGZpbGw9IiNkNzE0MWEiLz48cmVjdCB3aWR0aD0iMyIgaGVpZ2h0PSIxIiBmaWxsPSIjZmZmIi8+PHBvbHlnb24gcG9pbnRzPSIwLDAgMCwyIDEuNSwxIiBmaWxsPSIjMTE0NTdlIi8+PC9zdmc+" class="flag-icon"> Čeština
@@ -183,7 +181,6 @@
     </div>
 </div>
 
-<!-- ================= AUTH SCREEN ================= -->
 <div id="screen-auth" class="screen active-screen container">
     <div class="card" style="text-align: center;">
         <h2 data-i18n="auth_title" style="margin-bottom: 30px; justify-content: center;">Vyberte přístupovou roli</h2>
@@ -196,9 +193,8 @@
     </div>
 </div>
 
-<!-- ================= TL LOGIN SCREEN ================= -->
 <div id="screen-login" class="screen container">
-    <button class="btn btn-secondary" style="margin-bottom:20px; width: fit-content; background:#000000; color:#ffffff;" onclick="showScreen('screen-auth')">
+    <button class="btn btn-secondary" style="margin-bottom:20px; width: fit-content; background:transparent; padding:0; font-size:16px;" onclick="showScreen('screen-auth')">
         <span data-i18n="btn_back">Zpět</span>
     </button>
     <div class="card">
@@ -215,9 +211,8 @@
     </div>
 </div>
 
-<!-- ================= EMPLOYEE SCREEN ================= -->
 <div id="screen-emp" class="screen container">
-    <button class="btn btn-secondary" style="margin-bottom:20px; width: fit-content; background:#000000; color:#ffffff;" onclick="showScreen('screen-auth')">
+    <button class="btn btn-secondary" style="margin-bottom:20px; width: fit-content; background:transparent; padding:0; font-size:16px;" onclick="showScreen('screen-auth')">
         <span data-i18n="btn_back">Zpět</span>
     </button>
     
@@ -228,7 +223,7 @@
 
     <div class="card">
         <h3 data-i18n="emp_cages" style="margin-top:0;">Označte dokončené klece:</h3>
-        <p style="color: var(--text-muted); font-weight: 500; font-size: 14px;" data-i18n="emp_cages_info">Poznámka: Šedé klece byly již zpracovány v rámci aktuálního cyklu a nevyžadují zásah.</p>
+        <p style="color: var(--text-muted); font-weight: 500; font-size: 14px;" data-i18n="emp_cages_info">Poznámka: Šedé klece byly již zpracovány v aktuálním cyklu a nevyžadují zásah.</p>
         <div id="emp-cages-list" class="cages-grid"></div>
         <button class="btn" style="width: 100%; margin-top:25px;" onclick="submitEmp()">
             <img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/2705.svg" class="emoji-icon" alt="check"> <span data-i18n="emp_submit">Odeslat k ověření</span>
@@ -236,9 +231,7 @@
     </div>
 </div>
 
-<!-- ================= TEAM LEADER DASHBOARD ================= -->
 <div id="screen-tl-dash" class="screen container">
-    <!-- Logout Button -->
     <div style="display:flex; justify-content:flex-start; margin-bottom:15px;">
         <button class="btn btn-secondary" style="background:#000000; color:#ffffff;" onclick="showScreen('screen-auth')">
             <span data-i18n="btn_logout">Odhlásit se</span>
@@ -253,14 +246,12 @@
         <button id="tab-settings" onclick="switchTab('settings')"><img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/2699.svg" class="emoji-icon" alt="settings"> <span data-i18n="tab_settings">Správa</span></button>
     </div>
 
-    <!-- TL: AUDIT SECTION -->
     <div id="sec-audit" class="section active">
         <div class="tabs sub-tabs">
             <button id="mode-auto-btn" class="active" onclick="setAuditMode('auto')" data-i18n="audit_mode_auto">Fronta požadavků</button>
             <button id="mode-manual-btn" onclick="setAuditMode('manual')" data-i18n="audit_mode_manual">Manuální zadání</button>
         </div>
 
-        <!-- AUTO QUEUE -->
         <div id="audit-auto-view">
             <button class="btn" style="margin-bottom:15px; background:var(--high); font-size: 14px; padding: 10px 18px;" onclick="resetKPICycle()">
                 <img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/1f504.svg" class="emoji-icon" alt="refresh"> <span data-i18n="reset_kpi">Resetovat cyklus blokace</span>
@@ -268,7 +259,6 @@
             <div id="auto-queue-list"></div>
         </div>
 
-        <!-- MANUAL AUDIT -->
         <div id="audit-manual-view" style="display:none;">
             <div class="card">
                 <label data-i18n="select_worker">Vyberte zaměstnance pro ověření:</label>
@@ -284,7 +274,6 @@
             </div>
         </div>
 
-        <!-- RESULT BOX (Shared) -->
         <div id="result-box">
             <h3 data-i18n="cages_to_test">Položky vybrané k fyzickému ověření:</h3>
             <p id="sample-stats"></p>
@@ -298,7 +287,6 @@
         </div>
     </div>
     
-    <!-- TL: COVERAGE SECTION -->
     <div id="sec-coverage" class="section">
         <div class="card">
             <div class="header-flex">
@@ -314,7 +302,6 @@
         </div>
     </div>
 
-    <!-- TL: STATS SECTION -->
     <div id="sec-stats" class="section">
         <div class="card">
             <div class="header-flex">
@@ -338,7 +325,6 @@
         </div>
     </div>
 
-    <!-- TL: DATA SECTION -->
     <div id="sec-data" class="section">
         <div class="card">
             <h2 data-i18n="data_title">Systémový archiv dat</h2>
@@ -366,7 +352,6 @@
         </div>
     </div>
 
-    <!-- TL: SETTINGS SECTION -->
     <div id="sec-settings" class="section">
         <div class="card">
             <h2 data-i18n="settings_title">Administrace personálu</h2>
@@ -391,7 +376,6 @@
     </div>
 </div>
 
-<!-- PROFILE MODAL -->
 <div id="profile-modal" class="modal">
     <div class="modal-content">
         <span class="close-btn" onclick="closeProfile()"><img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/274c.svg" style="width:24px; height:24px;" alt="close"></span>
@@ -422,7 +406,7 @@
             emp_select_name: "Please select your profile:", emp_cages: "Indicate completed tasks:", emp_cages_info: "Note: Greyed out items have been processed in the current cycle and require no action.", emp_submit: "Submit for Verification", emp_success: "Data successfully submitted.", emp_confirm_submit: "Do you confirm the submission of this data for review?",
             audit_mode_auto: "Request Queue", audit_mode_manual: "Manual Entry", reset_kpi: "Reset Block Cycle", reset_kpi_confirm: "Confirm clearing the active task cycle to begin a new evaluation period?", queue_empty: "No pending verification requests.", btn_check: "Initiate Review", btn_cancel: "Reject", btn_regen: "Regenerate", cages_count: "Reported items: %count%",
             show_details: "View details ▾", hide_details: "Hide details ▴", alert_cancel_confirm: "Confirm rejection of this request? Affected items will be released back into the system.",
-            tab_audit: "Review", tab_coverage: "Coverage", tab_stats: "Statistics", tab_data: "Archive", tab_settings: "Personnel", select_worker: "Select employee for review:", done_cages: "Processed items to verify:", btn_generate: "Generate Review Sample", cages_to_test: "Items selected for physical review:", click_error: "Mark verified discrepancies:", btn_save_audit: "Save Review Results", stats_title: "Monthly Performance Metrics", stats_formula: "Error Rate Calculation: (Errors / Total Processed) × 100", btn_close_month: "Conclude Month", th_name: "Employee", th_cages: "Volume", th_shifts: "Days", th_avg: "Avg", th_errors: "Errors", th_error_rate: "Error Rate", th_risk: "Risk Profile", data_title: "System Data Archive", subtab_history: "Monthly Reports", subtab_alltime: "Global Statistics", history_desc: "Performance records aggregated by accounting periods.", alltime_desc: "Cumulative data across the entire recorded tenure.", th_cages_all: "Total Volume", th_shifts_all: "Total Days", th_errors_all: "Total Errors", th_error_rate_all: "Overall Error Rate", settings_title: "Personnel Administration", placeholder_name: "Full Name", btn_add_worker: "Register in System", th_risk_set: "Assigned Risk", th_action: "Management", alert_no_worker: "Please specify an employee profile.", alert_no_cage: "Please select at least one item for analysis.", alert_no_count: "Please provide exact quantity for category:", alert_saved_err: "Record saved. Discrepancies registered: %err%.", alert_saved_ok: "Record saved. Inspection concluded with zero discrepancies.", alert_add_ok: "Employee profile successfully created.", alert_del_confirm: "Irreversibly delete employee profile: %name%?\nPending requests will also be deleted.", alert_month_confirm: "Confirm monthly closure?\nData will be archived and operational scores reset.", alert_month_ok: "Monthly data successfully processed and archived.", lbl_error: "Register Discrepancy", lbl_count: "Specify quantity:", placeholder_count: "E.g. 2", lbl_empty_db: "-- Database is empty --", lbl_empty_history: "No historical records available.", stat_done: "Total Volume:", stat_risk: "Risk:", stat_test: "For Review:", dbl_click_hint: "Note: Double-click a row to access detailed analytical charts.", profile_title: "Analytical Profile: %name%", btn_toggle_global: "Display Facility Average", current_month: "Current", chart_avg_cages: "Throughput (Emp)", chart_err_rate: "Error Rate (Emp) %", chart_global_avg: "Throughput (Fac)", chart_global_err: "Error Rate (Fac) %", done_blocked: "Processed", refill_badge: "Refill continuously", audited_badge: "Reviewed this week", edit_prompt: "Enter new employee name:", cov_title: "Review Coverage (Weekly)", cov_desc: "Overview of categories reviewed this week.", btn_cov_reset: "Reset Weekly Coverage", cov_reset_confirm: "Clear review history for this week?"
+            tab_audit: "Review", tab_coverage: "Coverage", tab_stats: "Statistics", tab_data: "Archive", tab_settings: "Personnel", select_worker: "Select employee for review:", done_cages: "Processed items to verify:", btn_generate: "Generate Review Sample", cages_to_test: "Items selected for physical review:", click_error: "Mark verified discrepancies:", btn_save_audit: "Save Review Results", stats_title: "Monthly Performance Metrics", stats_formula: "Error Rate Calculation: (Errors / Total Processed) × 100", btn_close_month: "Conclude Month", th_name: "Employee", th_cages: "Volume", th_shifts: "Days", th_avg: "Avg", th_errors: "Errors", th_error_rate: "Error Rate", th_risk: "Risk Profile", data_title: "System Data Archive", subtab_history: "Monthly Reports", subtab_alltime: "Global Statistics", history_desc: "Performance records aggregated by accounting periods.", alltime_desc: "Cumulative data across the entire recorded tenure.", th_cages_all: "Total Volume", th_shifts_all: "Total Days", th_errors_all: "Total Errors", th_error_rate_all: "Overall Error Rate", settings_title: "Personnel Administration", placeholder_name: "Full Name", btn_add_worker: "Register in System", th_risk_set: "Assigned Risk", th_action: "Management", alert_no_worker: "Please specify an employee profile.", alert_no_cage: "Please select at least one item for analysis.", alert_no_count: "Please provide exact quantity for category:", alert_saved_err: "Record saved. Discrepancies registered: %err%.", alert_saved_ok: "Record saved. Review for %name% concluded with zero discrepancies.", alert_add_ok: "Employee profile successfully created.", alert_del_confirm: "Irreversibly delete employee profile: %name%?\nPending requests will also be deleted.", alert_month_confirm: "Confirm monthly closure?\nData will be archived and operational scores reset.", alert_month_ok: "Monthly data successfully processed and archived.", lbl_error: "Register Discrepancy", lbl_count: "Specify quantity:", placeholder_count: "E.g. 2", lbl_empty_db: "-- Database is empty --", lbl_empty_history: "No historical records available.", stat_done: "Total Volume:", stat_risk: "Risk:", stat_test: "For Review:", dbl_click_hint: "Note: Double-click a row to access detailed analytical charts.", profile_title: "Analytical Profile: %name%", btn_toggle_global: "Display Facility Average", current_month: "Current", chart_avg_cages: "Throughput (Emp)", chart_err_rate: "Error Rate (Emp) %", chart_global_avg: "Throughput (Fac)", chart_global_err: "Error Rate (Fac) %", done_blocked: "Processed", refill_badge: "Refill continuously", audited_badge: "Reviewed this week", edit_prompt: "Enter new employee name:", cov_title: "Review Coverage (Weekly)", cov_desc: "Overview of categories reviewed this week.", btn_cov_reset: "Reset Weekly Coverage", cov_reset_confirm: "Clear review history for this week?"
         },
         ru: {
             auth_title: "Выберите роль доступа", role_tl: "Руководитель (TL)", role_emp: "Сотрудник", btn_back: "Назад", btn_logout: "Выйти из системы",
