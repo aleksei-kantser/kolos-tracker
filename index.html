@@ -548,7 +548,7 @@
         renderWorkerSelect(); renderEmpWho(); renderAdminWorkers(); renderStats(); renderAllTimeStats(); updateWorkerRisk(); renderQueue();
     });
     
-    // Подгружаем историю 3-х дневных циклов (теперь это наша база для всей статистики)
+    // Подгружаем историю 3-х дневных циклов
     db.ref('history3Days').on('value', snap => {
         const data = snap.val(); history3DaysData = [];
         if (data) { for (let key in data) history3DaysData.push({ id: key, ...data[key] }); }
@@ -588,9 +588,8 @@
         changeLanguage(currentLang); 
         setupCustomLangDropdown(); 
         
-        // Emp draft autosave listeners
+        // Только 'change', убрали 'input' чтобы не сбивался фокус во время печатания цифр
         document.getElementById('emp-cages-list').addEventListener('change', saveEmpDraft);
-        document.getElementById('emp-cages-list').addEventListener('input', saveEmpDraft);
         
         // Проверка 3-дневного цикла
         db.ref('systemStats/last3DayReset').on('value', snap => {
@@ -693,7 +692,8 @@
                     return w ? w.name : "Neznámý";
                 }
             } else {
-                if((d.standards && d.standards.includes(cageId)) || (d.numbers && d.numbers[cageId])) {
+                // ИСПРАВЛЕНИЕ ДЛЯ ТЕСТОВИН (ПРОВЕРЯЕМ НЕ НА TRUE, А НА ОТСУТСТВИЕ UNDEFINED)
+                if((d.standards && d.standards.includes(cageId)) || (d.numbers && d.numbers[cageId] !== undefined)) {
                     let w = workers.find(x => x.id === wid);
                     return w ? w.name : "Neznámý";
                 }
@@ -806,7 +806,8 @@
         grid.querySelectorAll('.sub-cage:checked').forEach(cb => draft.subs.push(cb.getAttribute('data-parent') + "-" + cb.value));
         grid.querySelectorAll('.cage-number').forEach(input => {
             if(input.closest('.cage-wrapper').querySelector('.cage-item input').checked) {
-                draft.numbers[input.getAttribute('data-id')] = input.value;
+                // ИСПРАВЛЕНИЕ: Даем возможность сохранить пустую строку, чтобы чекбокс не слетал
+                draft.numbers[input.getAttribute('data-id')] = input.value || ""; 
             }
         });
         localStorage.setItem('kolos_draft_' + workerId, JSON.stringify(draft));
@@ -836,7 +837,8 @@
         });
         grid.querySelectorAll('.cage-number').forEach(input => {
             let id = input.getAttribute('data-id');
-            if(!input.disabled && draft.numbers[id]) {
+            // ИСПРАВЛЕНИЕ: Проверяем на undefined, а не на false, чтобы пустая строка "" тоже восстанавливала галочку
+            if(!input.disabled && draft.numbers[id] !== undefined) {
                 input.value = draft.numbers[id];
                 let wrapper = input.closest('.cage-wrapper');
                 wrapper.querySelector('.cage-item input').checked = true;
@@ -1022,7 +1024,6 @@
         return uniqueCages.slice(0, sampleSize);
     }
 
-    // Отображение сэмпла и поля для познамки
     function displaySampleView(worker, sampleArr, fullCagesArr) {
         currentAuditWorkerId = worker.id;
         currentLockedSample = sampleArr;
@@ -1052,7 +1053,6 @@
         const workerId = currentAuditWorkerId; const worker = workers.find(w => w.id === workerId);
         const errorsCount = document.querySelectorAll('.error-checkbox:checked').length;
         
-        // Сбор ошибок с познамками
         let errorItems = Array.from(document.querySelectorAll('.error-checkbox:checked')).map(cb => {
             let name = cb.closest('.audit-item').querySelector('span').innerText.trim()
                 .replace('Již ověřeno v tomto týdnu', '')
@@ -1144,7 +1144,6 @@
         if(confirm(t('cov_reset_confirm'))) db.ref('auditedThisWeek').remove();
     }
 
-    // Закрытие недели с проверкой покрытия
     function initiateWeekClose() {
         let missedCages = [];
         cageCategories.forEach(cat => {
@@ -1209,9 +1208,6 @@
         changeLanguage(currentLang);
     }
 
-
-    // --- 3-DAY CYCLE CLOSING LOGIC ---
-    // Месячная статистика теперь собирается из 3-дневных циклов, кнопки "закрыть месяц" больше нет.
     function close3DayCycle() {
         if(!confirm("Opravdu chcete uzavřít 3denní cyklus a archivovat aktuální statistiky?")) return;
         
@@ -1241,8 +1237,6 @@
         alert("3denní cyklus byl úspěšně uzavřen!");
     }
 
-
-    // --- SETTINGS ---
     function renderAdminCages() {
         const tbody = document.getElementById('admin-cage-list');
         tbody.innerHTML = '';
@@ -1305,10 +1299,9 @@
         const modal = document.getElementById('profile-modal');
         let workerName = "Neznámý"; 
         
-        // 1. АВТОМАТИЧЕСКАЯ АГРЕГАЦИЯ ПО МЕСЯЦАМ ИЗ 3-ДНЕВНЫХ ЦИКЛОВ
         let monthlyMap = {};
         let globalMonthlyMap = {};
-        let chron3Days = [...history3DaysData].reverse(); // Хронологический порядок
+        let chron3Days = [...history3DaysData].reverse();
         
         chron3Days.forEach(record => {
             let monthKey = getMonthString(record.timestamp);
@@ -1343,7 +1336,6 @@
             currentProfileData.months.gErrors.push(gm.sampled > 0 ? (gm.errors / gm.sampled * 100) : 0);
         }
 
-        // 2. ДАННЫЕ 3-ДНЕВНЫХ ЦИКЛОВ
         currentProfileData.days3 = { labels: [], wCages: [], wErrors: [], gCages: [], gErrors: [] };
         chron3Days.forEach(record => {
             currentProfileData.days3.labels.push(record.period); 
@@ -1361,7 +1353,6 @@
             currentProfileData.days3.gErrors.push(sumSampled > 0 ? (sumErrors / sumSampled * 100) : 0);
         });
 
-        // 3. ДОБАВЛЯЕМ ТЕКУЩИЕ НЕЗАКРЫТЫЕ ДАННЫЕ
         let currLabel = t('current_month');
         currentProfileData.months.labels.push(currLabel);
         currentProfileData.days3.labels.push(currLabel);
@@ -1391,7 +1382,6 @@
         document.getElementById('profile-title').innerText = t('profile_title').replace('%name%', workerName);
         isGlobalStatsVisible = false; 
         
-        // 4. ЗАГРУЗКА ЛОГОВ (ИСТОРИЯ ОВЕРЕНИЙ)
         db.ref('auditLogs/' + workerId).once('value', snap => {
             const logsData = snap.val() || {};
             let logs = Object.values(logsData).sort((a,b) => b.timestamp - a.timestamp);
@@ -1510,7 +1500,6 @@
         const container = document.getElementById('history-container'); container.innerHTML = '';
         if (history3DaysData.length === 0) { container.innerHTML = `<p style="color: var(--text-muted); font-size: 16px;">${t('lbl_empty_history')}</p>`; return; }
         
-        // Автоматическая агрегация по месяцам для вкладки "Архив/Měsíční přehledy"
         let monthlyGroups = {};
         history3DaysData.forEach(record => {
             let monthName = getMonthString(record.timestamp);
@@ -1527,7 +1516,6 @@
             });
         });
 
-        // Отрисовка сгруппированных месяцев
         for(let month in monthlyGroups) {
             let html = `<div class="history-card"><div class="history-header"><img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/1f4c5.svg" class="emoji-icon" alt="calendar"> ${month}</div><div class="table-responsive"><table class="stats-table"><thead><tr><th>${t('th_name')}</th><th>${t('th_cages')}</th><th>${t('th_sampled')}</th><th>${t('th_shifts')}</th><th>${t('th_avg')}</th><th>${t('th_errors')}</th><th>${t('th_error_rate')}</th><th>${t('th_risk')}</th></tr></thead><tbody>`;
             
@@ -1548,7 +1536,7 @@
 
     function renderAdminWorkers() {
         const tbody = document.getElementById('admin-worker-list'); tbody.innerHTML = '';
-        workers.forEach(w => { tbody.innerHTML += `<tr><td><strong>${w.name}</strong></td><td><span class="badge ${w.risk}">${w.risk.toUpperCase()}</span></td><td style="text-align: right;"><button class="btn-icon" onclick="editWorker('${w.id}', '${w.name}')"><img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/270f.svg" class="emoji-icon" alt="edit"></button><button class="btn-icon" onclick="removeWorker('${w.id}', '${w.name}')"><img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/1f5d1.svg" class="emoji-icon" alt="trash"></button></td></tr>`; });
+        workers.forEach(w => { tbody.innerHTML += `<tr><td><strong>${w.name}</strong></td><td><span class=\"badge ${w.risk}\">${w.risk.toUpperCase()}</span></td><td style=\"text-align: right;\"><button class=\"btn-icon\" onclick=\"editWorker('${w.id}', '${w.name}')\"><img src=\"https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/270f.svg\" class=\"emoji-icon\" alt=\"edit\"></button><button class=\"btn-icon\" onclick=\"removeWorker('${w.id}', '${w.name}')\"><img src=\"https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/1f5d1.svg\" class=\"emoji-icon\" alt=\"trash\"></button></td></tr>`; });
     }
 
     window.onload = init;
