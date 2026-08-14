@@ -548,7 +548,6 @@
         renderWorkerSelect(); renderEmpWho(); renderAdminWorkers(); renderStats(); renderAllTimeStats(); updateWorkerRisk(); renderQueue();
     });
     
-    // Подгружаем историю 3-х дневных циклов
     db.ref('history3Days').on('value', snap => {
         const data = snap.val(); history3DaysData = [];
         if (data) { for (let key in data) history3DaysData.push({ id: key, ...data[key] }); }
@@ -588,10 +587,9 @@
         changeLanguage(currentLang); 
         setupCustomLangDropdown(); 
         
-        // Только 'change', убрали 'input' чтобы не сбивался фокус во время печатания цифр
+        // Изменили прослушиватель на change, чтобы не сбивался фокус при вводе цифр!
         document.getElementById('emp-cages-list').addEventListener('change', saveEmpDraft);
         
-        // Проверка 3-дневного цикла
         db.ref('systemStats/last3DayReset').on('value', snap => {
             let lastReset = snap.val() || Date.now();
             let daysPassed = (Date.now() - lastReset) / (1000 * 3600 * 24);
@@ -683,7 +681,7 @@
         for(let wid in inProgressData) {
             if(wid === myWorkerId) continue;
             let data = inProgressData[wid];
-            if(Date.now() - data.timestamp > 2 * 3600 * 1000) continue; // ignore > 2 hours
+            if(Date.now() - data.timestamp > 2 * 3600 * 1000) continue; 
             let d = data.draft;
             if(!d) continue;
             if(subId) {
@@ -692,8 +690,7 @@
                     return w ? w.name : "Neznámý";
                 }
             } else {
-                // ИСПРАВЛЕНИЕ ДЛЯ ТЕСТОВИН (ПРОВЕРЯЕМ НЕ НА TRUE, А НА ОТСУТСТВИЕ UNDEFINED)
-                if((d.standards && d.standards.includes(cageId)) || (d.numbers && d.numbers[cageId] !== undefined)) {
+                if((d.standards && d.standards.includes(cageId)) || (d.numbers && d.numbers[cageId])) {
                     let w = workers.find(x => x.id === wid);
                     return w ? w.name : "Neznámý";
                 }
@@ -713,8 +710,8 @@
     }
 
     function onWorkerSwitch() {
-        renderCages('emp-cages-list', true); // Обновляем клетки под нового юзера
-        loadEmpDraft();                      // Подгружаем его локальный драфт
+        renderCages('emp-cages-list', true);
+        loadEmpDraft();                      
     }
 
     function renderWorkerSelect() {
@@ -764,7 +761,8 @@
                 }).join('');
                 
                 let itemClass = anySubInProgWorker ? "in-progress" : "";
-                grid.innerHTML += `<div class="cage-wrapper"><label class="cage-item ${itemClass}" style="margin-bottom:0;"><input type="checkbox" onchange="document.getElementById('exp_${cat.id}_${containerId}').style.display = this.checked ? 'block' : 'none'"><span>${catName} ▾</span>${specialBadge}</label><div id="exp_${cat.id}_${containerId}" class="expand-box">${subsHtml}</div></div>`;
+                // ДОБАВЛЕН КЛАСС expand-toggle
+                grid.innerHTML += `<div class="cage-wrapper"><label class="cage-item ${itemClass}" style="margin-bottom:0;"><input type="checkbox" class="expand-toggle" data-cat-id="${cat.id}" onchange="document.getElementById('exp_${cat.id}_${containerId}').style.display = this.checked ? 'block' : 'none'"><span>${catName} ▾</span>${specialBadge}</label><div id="exp_${cat.id}_${containerId}" class="expand-box">${subsHtml}</div></div>`;
             } else if (cat.type === 'number') {
                 let isCatBlocked = isEmpMode ? isCageBlocked(cat.id, cat.freq) : false;
                 let inProgWorker = isEmpMode ? getInProgressWorker(cat.id, null) : null;
@@ -773,7 +771,8 @@
                 let itemClass = isCatBlocked ? "blocked" : (inProgWorker ? "in-progress" : "");
                 let info = isCatBlocked ? ` &nbsp;<span style="font-size:13px; color:var(--text-muted);">${t('done_blocked')}</span>` : (inProgWorker ? ` &nbsp;<span style="font-size:12px; color:var(--medium); font-weight:600;">(${t('in_progress').replace('%name%', inProgWorker)})</span>` : "");
                 
-                grid.innerHTML += `<div class="cage-wrapper"><label class="cage-item ${itemClass}" style="margin-bottom:0;"><input type="checkbox" ${dis} onchange="document.getElementById('exp_${cat.id}_${containerId}').style.display = this.checked ? 'block' : 'none'; if(!this.checked) { let el = document.getElementById('num_${cat.id}_${containerId}'); if(el) el.value = ''; }"><span>${catName} ▾</span>${specialBadge}${info}</label><div id="exp_${cat.id}_${containerId}" class="expand-box"><label style="font-size: 14px; margin-bottom: 5px;">${t('lbl_count')}</label><input type="number" id="num_${cat.id}_${containerId}" data-id="${cat.id}" class="cage-number" min="1" placeholder="${t('placeholder_count')}" ${dis}></div></div>`;
+                // ДОБАВЛЕН КЛАСС expand-toggle
+                grid.innerHTML += `<div class="cage-wrapper"><label class="cage-item ${itemClass}" style="margin-bottom:0;"><input type="checkbox" class="expand-toggle" data-cat-id="${cat.id}" ${dis} onchange="document.getElementById('exp_${cat.id}_${containerId}').style.display = this.checked ? 'block' : 'none'; if(!this.checked) { let el = document.getElementById('num_${cat.id}_${containerId}'); if(el) el.value = ''; }"><span>${catName} ▾</span>${specialBadge}${info}</label><div id="exp_${cat.id}_${containerId}" class="expand-box"><label style="font-size: 14px; margin-bottom: 5px;">${t('lbl_count')}</label><input type="number" id="num_${cat.id}_${containerId}" data-id="${cat.id}" class="cage-number" min="1" placeholder="${t('placeholder_count')}" ${dis}></div></div>`;
             }
         });
     }
@@ -800,14 +799,17 @@
     function saveEmpDraft() {
         const workerId = document.getElementById('emp-who').value;
         if(!workerId) return;
-        let draft = { standards: [], subs: [], numbers: {} };
+        let draft = { standards: [], subs: [], numbers: {}, expanded: [] };
         const grid = document.getElementById('emp-cages-list');
         grid.querySelectorAll('.standard-cage:checked').forEach(cb => draft.standards.push(cb.value));
         grid.querySelectorAll('.sub-cage:checked').forEach(cb => draft.subs.push(cb.getAttribute('data-parent') + "-" + cb.value));
+        
+        // Сохраняем состояние раскрытых меню
+        grid.querySelectorAll('.expand-toggle:checked').forEach(cb => draft.expanded.push(cb.getAttribute('data-cat-id')));
+        
         grid.querySelectorAll('.cage-number').forEach(input => {
             if(input.closest('.cage-wrapper').querySelector('.cage-item input').checked) {
-                // ИСПРАВЛЕНИЕ: Даем возможность сохранить пустую строку, чтобы чекбокс не слетал
-                draft.numbers[input.getAttribute('data-id')] = input.value || ""; 
+                draft.numbers[input.getAttribute('data-id')] = input.value;
             }
         });
         localStorage.setItem('kolos_draft_' + workerId, JSON.stringify(draft));
@@ -823,26 +825,43 @@
         draft.standards = draft.standards || [];
         draft.subs = draft.subs || [];
         draft.numbers = draft.numbers || {};
+        draft.expanded = draft.expanded || [];
         const grid = document.getElementById('emp-cages-list');
         
         grid.querySelectorAll('.standard-cage').forEach(cb => { if(!cb.disabled && draft.standards.includes(cb.value)) cb.checked = true; });
+        
+        // Восстанавливаем раскрытые меню ПЕРЕД чекбоксами
+        draft.expanded.forEach(catId => {
+            let cb = grid.querySelector(`.expand-toggle[data-cat-id="${catId}"]`);
+            if(cb && !cb.disabled) {
+                cb.checked = true;
+                let exp = document.getElementById('exp_' + catId + '_emp-cages-list');
+                if(exp) exp.style.display = 'block';
+            }
+        });
+
         grid.querySelectorAll('.sub-cage').forEach(cb => {
             let id = cb.getAttribute('data-parent') + "-" + cb.value;
             if(!cb.disabled && draft.subs.includes(id)) {
                 cb.checked = true;
-                let exp = document.getElementById('exp_' + cb.getAttribute('data-parent') + '_emp-cages-list');
-                if(exp) exp.style.display = 'block';
-                cb.closest('.cage-wrapper').querySelector('.cage-item input').checked = true;
+                let parentCb = grid.querySelector(`.expand-toggle[data-cat-id="${cb.getAttribute('data-parent')}"]`);
+                if(parentCb) {
+                    parentCb.checked = true;
+                    let exp = document.getElementById('exp_' + cb.getAttribute('data-parent') + '_emp-cages-list');
+                    if(exp) exp.style.display = 'block';
+                }
             }
         });
         grid.querySelectorAll('.cage-number').forEach(input => {
             let id = input.getAttribute('data-id');
-            // ИСПРАВЛЕНИЕ: Проверяем на undefined, а не на false, чтобы пустая строка "" тоже восстанавливала галочку
-            if(!input.disabled && draft.numbers[id] !== undefined) {
+            if(!input.disabled && draft.numbers[id]) {
                 input.value = draft.numbers[id];
                 let wrapper = input.closest('.cage-wrapper');
-                wrapper.querySelector('.cage-item input').checked = true;
-                wrapper.querySelector('.expand-box').style.display = 'block';
+                let parentCb = wrapper.querySelector('.expand-toggle');
+                if(parentCb) {
+                    parentCb.checked = true;
+                    wrapper.querySelector('.expand-box').style.display = 'block';
+                }
             }
         });
     }
@@ -1237,6 +1256,8 @@
         alert("3denní cyklus byl úspěšně uzavřen!");
     }
 
+
+    // --- SETTINGS ---
     function renderAdminCages() {
         const tbody = document.getElementById('admin-cage-list');
         tbody.innerHTML = '';
@@ -1301,7 +1322,7 @@
         
         let monthlyMap = {};
         let globalMonthlyMap = {};
-        let chron3Days = [...history3DaysData].reverse();
+        let chron3Days = [...history3DaysData].reverse(); 
         
         chron3Days.forEach(record => {
             let monthKey = getMonthString(record.timestamp);
