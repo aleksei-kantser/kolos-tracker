@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KCS-Tracker - Prezentace pro management</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-main: #F2F2F7;
+            --card-bg: #FFFFFF;
+            --albert-blue: #005b9f;
+            --albert-yellow: #ffc20e;
+            --albert-green: #78be20;
+            --text-main: #1C1C1E;
+            --text-muted: #8E8E93;
+            --border: #E5E5EA;
+        }
+
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #222; /* Tmavé pozadí okolo prezentace (jako v PowerPointu) */
+            color: var(--text-main);
+            overflow: hidden;
+        }
+
+        /* Viewport pro vycentrování a škálování plátna */
+        .presentation-viewport {
+            width: 100vw; height: 100vh;
+            display: flex; justify-content: center; align-items: center;
+            position: relative;
+        }
+
+        /* Fixní plátno 16:9 (1280x720) - zajišťuje absolutní symetrii a proporce */
+        .presentation-canvas {
+            width: 1280px; height: 720px;
+            background-color: var(--bg-main);
+            position: relative;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.5);
+            border-radius: 8px;
+            overflow: hidden;
+            transform-origin: center center;
+            display: flex; flex-direction: column;
+        }
+
+        /* Top Bar - Hlavička na každém slidu */
+        .top-bar {
+            height: 60px;
+            background: var(--card-bg);
+            padding: 0 40px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 1px 10px rgba(0,0,0,0.05);
+            z-index: 10;
+            flex-shrink: 0;
+        }
+        .logo { font-size: 22px; font-weight: 700; color: var(--albert-blue); display: flex; align-items: center; gap: 12px; }
+        .slide-counter { font-size: 16px; font-weight: 600; color: var(--text-muted); background: var(--bg-main); padding: 6px 18px; border-radius: 20px;}
+
+        /* Oblast pro samotné slidy */
+        .slides-wrapper {
+            flex-grow: 1;
+            position: relative;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            padding: 25px 50px; /* Zmenšeno pro více vertikálního prostoru */
+            box-sizing: border-box;
+            display: flex; flex-direction: column;
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.4s ease;
+        }
+
+        .slide.active {
+            opacity: 1; visibility: visible;
+            z-index: 5;
+        }
+
+        /* Typografie upravená pro 1280x720 rozlišení */
+        h1 { font-size: 46px; font-weight: 800; color: var(--albert-blue); margin-top: 0; line-height: 1.2; margin-bottom: 20px;}
+        h2 { font-size: 34px; font-weight: 700; color: var(--albert-blue); margin-top: 0; margin-bottom: 15px; border-bottom: 2px solid var(--border); padding-bottom: 10px; }
+        h3 { font-size: 22px; color: var(--text-main); margin-top: 0; margin-bottom: 10px;}
+        p { font-size: 20px; line-height: 1.4; color: var(--text-main); margin-top: 0; margin-bottom: 15px;}
+        .highlight { color: var(--albert-blue); font-weight: 700; }
+        
+        /* Grid Layouty - Zajišťují dokonalou symetrii */
+        .content-area { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: stretch; height: 100%; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; align-items: stretch; height: 100%; }
+        .grid-2x2 { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 20px; height: 100%; }
+        
+        .box { background: var(--card-bg); padding: 20px 25px; border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; flex-direction: column; justify-content: center; height: 100%; box-sizing: border-box; }
+        .box-red { border-left: 6px solid #FF3B30; background: #FFF5F5; }
+        .box-green { border-left: 6px solid var(--albert-green); background: #F0FDF4; }
+        .box-blue { border-left: 6px solid var(--albert-blue); background: #F0F8FF; }
+        
+        /* Seznamy */
+        ul.custom-list { list-style: none; padding: 0; margin: 0; }
+        ul.custom-list li { position: relative; padding-left: 35px; margin-bottom: 12px; font-size: 19px; line-height: 1.4; }
+        ul.custom-list.bad li::before { content: "✕"; position: absolute; left: 0; color: #FF3B30; font-weight: bold; font-size: 22px; }
+        ul.custom-list.good li::before { content: "✓"; position: absolute; left: 0; color: var(--albert-green); font-weight: bold; font-size: 22px; }
+
+        .big-icon { font-size: 40px; margin-bottom: 10px; display: block; text-align: center; }
+
+        /* Komiks - Upraveno pro proporce */
+        .comic-container { display: flex; flex-direction: column; gap: 15px; padding: 20px; background: var(--card-bg); border-radius: 16px; border: 2px dashed var(--border); height: 100%; box-sizing: border-box; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        .comic-row { display: flex; align-items: flex-end; gap: 15px; animation: fadeIn 0.5s ease-in-out forwards; opacity: 0; }
+        .comic-row:nth-child(1) { animation-delay: 0.2s; }
+        .comic-row:nth-child(2) { animation-delay: 1.0s; }
+        .comic-row:nth-child(3) { animation-delay: 1.8s; }
+        .comic-row.right { flex-direction: row-reverse; }
+        .comic-char { font-size: 42px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); }
+        .speech-bubble { position: relative; border-radius: 20px; padding: 15px 20px; font-size: 18px; font-weight: 500; max-width: 75%; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .comic-row:not(.right) .speech-bubble { background: #F0F8FF; border: 1px solid #cce5ff; border-bottom-left-radius: 4px; color: var(--albert-blue); }
+        .comic-row.right .speech-bubble { background: #FFF5F5; border: 1px solid #f5c6cb; border-bottom-right-radius: 4px; color: #FF3B30; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Ovládací prvky mimo plátno */
+        .controls {
+            position: absolute; bottom: 25px; right: 35px;
+            display: flex; gap: 15px; z-index: 100;
+        }
+        .btn-nav {
+            background: rgba(255, 255, 255, 0.1); color: white; border: 2px solid rgba(255,255,255,0.3);
+            width: 50px; height: 50px; border-radius: 50%;
+            font-size: 22px; cursor: pointer;
+            transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .btn-nav:hover:not(:disabled) { background: rgba(255, 255, 255, 0.3); transform: scale(1.1); }
+        .btn-nav:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        /* Tlačítko pro živou ukázku */
+        .btn-demo {
+            display: inline-flex; align-items: center; justify-content: center;
+            background: var(--albert-green); color: white; text-decoration: none;
+            padding: 14px 30px; border-radius: 12px; font-size: 20px; font-weight: 700;
+            box-shadow: 0 6px 20px rgba(120, 190, 32, 0.3);
+            transition: all 0.2s; 
+        }
+        .btn-demo:hover {
+            transform: translateY(-3px); box-shadow: 0 10px 25px rgba(120, 190, 32, 0.5);
+        }
+        
+        /* Graf wrapper */
+        .chart-wrapper { position: relative; height: 100%; width: 100%; min-height: 200px; }
+    </style>
+</head>
+<body>
+
+    <div class="presentation-viewport">
+        <!-- Zde je fixní 16:9 plátno (1280x720) -->
+        <div class="presentation-canvas" id="canvas">
+            
+            <!-- Hlavička -->
+            <div class="top-bar">
+                <div class="logo">
+                    <span style="background:var(--albert-yellow); width:18px; height:18px; border-radius:50%; display:inline-block;"></span>
+                    Projekt KCS-Tracker
+                </div>
+                <div class="slide-counter">Snímek <span id="current-slide">1</span> z <span id="total-slides">9</span></div>
+            </div>
+
+            <!-- Slidy -->
+            <div class="slides-wrapper">
+                
+                <!-- Slide 1: Intro -->
+                <div class="slide active" id="slide-1">
+                    <div class="content-area" style="align-items: center; text-align: center;">
+                        <h1>KCS-Tracker</h1>
+                        <p style="font-size: 26px; color: var(--text-muted); max-width: 900px;">
+                            Od slepého skenování k efektivní digitalizaci, přesným datům a měřitelnému výkonu zaměstnanců.
+                        </p>
+                        <div style="margin-top: 40px; display: flex; justify-content: center; gap: 30px; width: 100%; max-width: 1000px;">
+                            <div class="box box-blue" style="flex: 1; align-items: center;">
+                                <span class="big-icon">⏱️</span>
+                                <strong style="font-size: 20px;">Úspora času</strong>
+                            </div>
+                            <div class="box box-green" style="flex: 1; align-items: center;">
+                                <span class="big-icon">📈</span>
+                                <strong style="font-size: 20px;">Vyšší efektivita</strong>
+                            </div>
+                            <div class="box box-red" style="flex: 1; align-items: center;">
+                                <span class="big-icon">📊</span>
+                                <strong style="font-size: 20px;">Přesná data</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 2: Problém s KCS -->
+                <div class="slide" id="slide-2">
+                    <h2>1. Počáteční problém: Slepé skenování</h2>
+                    <div class="content-area">
+                        <div class="grid-2">
+                            <div style="display: flex; flex-direction: column;">
+                                <p>Současný proces zpracování KCS tabule (např. v pondělí ráno) je zdlouhavý a často neefektivní.</p>
+                                <div class="box box-red" style="flex-grow: 1;">
+                                    <h3>Co je špatně?</h3>
+                                    <ul class="custom-list bad">
+                                        <li><b>Team leader</b> jde na plochu a skenuje prázdná místa, <b>aniž by věděl, KDY se daná kategorie doplňovala.</b></li>
+                                        <li>Pokud je regál prázdný, je vysoká pravděpodobnost, že se zboží sice doplňovalo, ale už se vyprodalo, NEBO leží nedoplněné hluboko ve skladu.</li>
+                                        <li>Následné dohledávání na skladě naslepo stojí obrovské množství času.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="box" style="align-items: center; text-align: center; background: transparent; border: none; box-shadow: none;">
+                                <img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/1f575.svg" style="width: 130px; opacity: 0.8; margin-bottom: 20px;">
+                                <p style="font-weight: 600; color: var(--text-muted); font-size: 22px;">Pondělní pátrání ve skladu po zboží,<br>o kterém nevíme, kdy se naposledy řešilo.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 3: Problém s evidencí -->
+                <div class="slide" id="slide-3">
+                    <h2>2. Chybějící evidence práce</h2>
+                    <div class="content-area">
+                        <div class="grid-2">
+                            <div style="display: flex; flex-direction: column;">
+                                <p>Nemáme žádný centralizovaný tracker toho, co se na úseku koloniál za poslední 2 dny reálně udělalo.</p>
+                                <div class="box box-red" style="flex-grow: 1;">
+                                    <h3>Následky chybějící evidence:</h3>
+                                    <ul class="custom-list bad">
+                                        <li><b>Duplicity:</b> Některé kategorie se zpracovávají zbytečně několikrát za den.</li>
+                                        <li><b>Ignorované zboží:</b> Mnoho klecí zůstává netknutých i celý týden.</li>
+                                        <li><b>Slepá místa:</b> Zaměstnanci zapomínají na kategorie mimo hlavní sklad <i>(např. položky pod plachtou nebo ve skříňce)</i>.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div>
+                                <!-- Comic Style Infographic -->
+                                <div class="comic-container">
+                                    <div class="comic-row">
+                                        <div class="comic-char">🧑‍🔧</div>
+                                        <div class="speech-bubble">Nevíš náhodou, kdo dělal ráno klec s kávou? ☕</div>
+                                    </div>
+                                    <div class="comic-row right">
+                                        <div class="comic-char">🤷‍♂️</div>
+                                        <div class="speech-bubble">Fakt netuším, nikde to není napsané.</div>
+                                    </div>
+                                    <div class="comic-row">
+                                        <div class="comic-char">🧑‍🔧</div>
+                                        <div class="speech-bubble">Tak já ji jdu udělat znovu... Zase ztracenej čas. 🤦‍♂️</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 4: Řešení Kološ Tracker -->
+                <div class="slide" id="slide-4">
+                    <h2>Řešení: Aplikace KCS-Tracker</h2>
+                    <p>Digitalizace procesu. Jednoduchá webová aplikace přístupná z Perkony nebo telefonu, která řeší oba problémy najednou.</p>
+                    <div class="content-area" style="margin-top: 10px;">
+                        <div class="grid-3">
+                            <div class="box box-green" style="align-items: center; text-align: center;">
+                                <span class="big-icon">✅</span>
+                                <h3>Digitální Checklist</h3>
+                                <p style="font-size: 17px;">Zaměstnanec na pár kliknutí označí, jaké kategorie klecí během své směny zpracoval. Vše je ihned v systému.</p>
+                            </div>
+                            <div class="box box-green" style="align-items: center; text-align: center;">
+                                <span class="big-icon">👁️</span>
+                                <h3>Sdílený přehled</h3>
+                                <p style="font-size: 17px;">Zaměstnanci na odpolední směně vidí zašedlé kategorie, které už udělala ranní směna. Už žádná duplicita.</p>
+                            </div>
+                            <div class="box box-green" style="align-items: center; text-align: center;">
+                                <span class="big-icon">🔔</span>
+                                <h3>Prevence zapomínání</h3>
+                                <p style="font-size: 17px;">Systém hlídá cykly. Pokud skříňka pod zámečkem nebyla 2 dny vyložena, systém na ni vizuálně upozorní.</p>
+                            </div>
+                        </div>
+                        <div style="text-align: center; margin-top: 25px; flex-shrink: 0;">
+                            <a href="https://aleksei-kantser.github.io/kolos-tracker/" target="_blank" class="btn-demo">
+                                🚀 Spustit KCS-Tracker (Živá ukázka)
+                            </a>
+                            <p style="margin-top: 10px; font-size: 16px; color: var(--text-muted); margin-bottom: 0;">
+                                Team-leader přístupové údaje &rarr; Login: <b style="color: var(--text-main);">Albert</b> | Heslo: <b style="color: var(--text-main);">123</b>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 5: Zrychlení KCS -->
+                <div class="slide" id="slide-5">
+                    <h2>Jak to zrychlí KCS tabuli? (Max 10 minut)</h2>
+                    <div class="content-area">
+                        <div class="grid-2">
+                            <div style="display: flex; flex-direction: column;">
+                                <p>Znalost času je klíčová. Proces kontroly práce zaměstnance a založení inventury nyní zabere <b style="color:var(--albert-blue);">maximálně 10 minut</b>.</p>
+                                <div class="box box-blue" style="flex-grow: 1;">
+                                    <h3>Proč tak obrovský rozdíl?</h3>
+                                    <ul class="custom-list good">
+                                        <li>Ověřujeme klec, kterou zaměstnanec zpracoval <b>před pár hodinami</b> - čerstvá stopa.</li>
+                                        <li>Jestliže v regálu zboží chybí, pravděpodobnost ztráty ve skladu je minimální.</li>
+                                        <li>Neprověřujeme celý obchod naráz, ale děláme rychlé cílené kontroly.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="box" style="align-items: center; text-align: center; justify-content: center; background: white;">
+                                <div style="font-size: 75px; color: var(--albert-blue); font-weight: 800; line-height: 1; margin-bottom: 15px;">10 min</div>
+                                <p style="font-size: 24px; color: var(--text-muted); margin: 0;">Cílená okamžitá kontrola<br><span style="font-size: 18px;">vs. hodiny práce v pondělí</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 6: Analytika zaměstnanců -->
+                <div class="slide" id="slide-6">
+                    <h2>Měření efektivity zaměstnanců</h2>
+                    <div class="content-area">
+                        <div class="grid-2">
+                            <div style="display: flex; flex-direction: column;">
+                                <p>Aplikace automaticky sbírá data o výkonu každého pracovníka. Už se nerozhodujeme na základě dojmů.</p>
+                                <div class="box" style="flex-grow: 1;">
+                                    <ul class="custom-list good">
+                                        <li><b>Kvantita:</b> Kolik klecí průměrně udělá za směnu?</li>
+                                        <li><b>Chybovost:</b> Kolik z kontrolovaných klecí bylo vykázáno chybně (zboží chybělo)?</li>
+                                        <li><b>Plánování:</b> Zjistíme, kolik lidí skutečně potřebujeme.</li>
+                                        <li><b>Rozhodnutí:</b> Rychlá identifikace lidí s negativními výsledky vůči průměru.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="box" style="background: white; padding-top: 15px; padding-bottom: 15px;">
+                                <h3 style="text-align: center; font-size: 18px; margin-bottom: 15px;">Výkon jednotlivce vs. Průměr prodejny</h3>
+                                <div class="chart-wrapper">
+                                    <canvas id="performanceChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 7: Profilování rizika -->
+                <div class="slide" id="slide-7">
+                    <h2>Chytrá kontrola: Profilování rizika (LOW/MED/HIGH)</h2>
+                    <p>Abychom neztráceli čas plošnou kontrolou spolehlivých lidí, systém používá dynamické řízení rizikovosti.</p>
+                    <div class="content-area" style="margin-top: 10px; flex-grow: 0.8;">
+                        <div class="grid-3">
+                            <div class="box box-green" style="align-items: center; text-align: center;">
+                                <div style="background: var(--albert-green); color: white; padding: 8px 20px; border-radius: 25px; font-weight: bold; font-size: 18px; margin-bottom: 20px;">LOW RISK (10%)</div>
+                                <p style="font-size: 17px;">Spolehlivý pracovník bez chyb. Systém mu přidělí k fyzické kontrole <b>pouze 1 náhodnou klec z 10</b>.</p>
+                            </div>
+                            <div class="box box-blue" style="align-items: center; text-align: center;">
+                                <div style="background: var(--albert-blue); color: white; padding: 8px 20px; border-radius: 25px; font-weight: bold; font-size: 18px; margin-bottom: 20px;">MEDIUM RISK (30%)</div>
+                                <p style="font-size: 17px;">Standardní kontrola. Odbaví 10 klecí, my zkontrolujeme 3 náhodně vybrané.</p>
+                            </div>
+                            <div class="box box-red" style="align-items: center; text-align: center;">
+                                <div style="background: #FF3B30; color: white; padding: 8px 20px; border-radius: 25px; font-weight: bold; font-size: 18px; margin-bottom: 20px;">HIGH RISK (50%)</div>
+                                <p style="font-size: 17px;">Nový brigádník nebo pracovník s vysokou chybovostí. Intenzivní kontrola jeho práce.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <p style="text-align: center; margin-top: 20px; font-size: 18px; color: var(--text-muted);"><i>Na konci cyklu systém na základě chybovosti <b>automaticky přehodnotí</b> rizikovost zaměstnance.</i></p>
+                </div>
+
+                <!-- Slide 8: Cykly a pokrytí -->
+                <div class="slide" id="slide-8">
+                    <h2>Sledování pokrytí a uzavírání cyklů</h2>
+                    <div class="content-area">
+                        <div class="grid-2">
+                            <div style="display: flex; flex-direction: column;">
+                                <p>Celý systém funguje v definovaných časových blocích (např. 3-denní nebo týdenní cykly).</p>
+                                <div class="box box-blue" style="flex-grow: 1;">
+                                    <h3>Garance 100% zpracování</h3>
+                                    <ul class="custom-list good">
+                                        <li>Záložka "Pokrytí" monitoruje kategorie, které ještě nebyly v daném týdnu vůbec řešeny.</li>
+                                        <li>Při uzavírání cyklu aplikace vyhodí upozornění na "visící" klece, které je nutné naskenovat.</li>
+                                        <li>Výsledek: <b>Žádný regál už nezůstane týden prázdný jen z nepozornosti.</b></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="box" style="align-items: center; background: transparent; border: none; box-shadow: none;">
+                                <img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/1f504.svg" style="width: 150px; opacity: 0.9;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 9: Závěr a shrnutí -->
+                <div class="slide" id="slide-9">
+                    <h2 style="text-align: center; border: none; padding-bottom: 0;">Co Albert získá nasazením této aplikace?</h2>
+                    <div class="content-area">
+                        <div class="grid-2x2">
+                            <div class="box box-green">
+                                <h3 style="margin-bottom: 10px;">🛒 Vyšší dostupnost zboží</h3>
+                                <p style="font-size: 16px; margin: 0;">Zboží je na ploše doplněno rychleji, regály nejsou prázdné. Přímý dopad na zvýšení tržeb prodejny.</p>
+                            </div>
+                            <div class="box box-blue">
+                                <h3 style="margin-bottom: 10px;">⏳ Dramatická úspora času TL</h3>
+                                <p style="font-size: 16px; margin: 0;">Řešení KCS tabule se zrychlí díky efektivním 10minutovým kontrolám. Žádné slepé hledání.</p>
+                            </div>
+                            <div class="box box-red">
+                                <h3 style="margin-bottom: 10px;">👥 Skutečné řízení výkonu</h3>
+                                <p style="font-size: 16px; margin: 0;">Přesně víme, kdo je efektivní. Máme nezvratná data o chybovosti pro personální rozhodnutí.</p>
+                            </div>
+                            <div class="box" style="border-left: 6px solid var(--albert-yellow);">
+                                <h3 style="margin-bottom: 10px;">💻 Nulové IT překážky</h3>
+                                <p style="font-size: 16px; margin: 0;">Webová aplikace běží okamžitě v prohlížeči (mobil, Perkona). Žádné instalace, ihned připraveno.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <h3 style="text-align: center; color: var(--albert-blue); font-size: 26px; margin-top: 25px; margin-bottom: 0;">Děkuji za pozornost. Prostor pro dotazy.</h3>
+                </div>
+
+            </div>
+        </div>
+        
+        <!-- Controls mimo plátno -->
+        <div class="controls">
+            <button class="btn-nav" id="prev-btn" onclick="changeSlide(-1)">❮</button>
+            <button class="btn-nav" id="next-btn" onclick="changeSlide(1)">❯</button>
+        </div>
+    </div>
+
+    <script>
+        // Logika pro automatické škálování fixního plátna (1280x720) do jakéhokoliv okna prohlížeče
+        function resizePresentation() {
+            const viewport = document.querySelector('.presentation-viewport');
+            const canvas = document.getElementById('canvas');
+            const vW = viewport.clientWidth;
+            const vH = viewport.clientHeight;
+            
+            // Škálování tak, aby plátno vždy stoprocentně pasovalo do okna a zachovalo si 16:9 proporce
+            const scale = Math.min(vW / 1280, vH / 720) * 0.95; // 0.95 nechává malý bezpečný okraj
+            canvas.style.transform = `scale(${scale})`;
+        }
+
+        window.addEventListener('resize', resizePresentation);
+        resizePresentation(); // Spustit hned po načtení
+
+        // Logika pro posun slidů
+        let currentSlide = 1;
+        const totalSlides = 9;
+        let chartInstance = null;
+
+        function updateSlideVisibility() {
+            document.querySelectorAll('.slide').forEach((slide, index) => {
+                if (index + 1 === currentSlide) {
+                    slide.classList.add('active');
+                } else {
+                    slide.classList.remove('active');
+                }
+            });
+            
+            document.getElementById('current-slide').innerText = currentSlide;
+            document.getElementById('prev-btn').disabled = (currentSlide === 1);
+            document.getElementById('next-btn').disabled = (currentSlide === totalSlides);
+
+            // Init chart when slide 6 is shown
+            if (currentSlide === 6 && !chartInstance) {
+                setTimeout(initChart, 300); // Mírné zpoždění pro dokončení CSS animace (fade-in) před renderováním grafu
+            }
+        }
+
+        function changeSlide(direction) {
+            currentSlide += direction;
+            if (currentSlide < 1) currentSlide = 1;
+            if (currentSlide > totalSlides) currentSlide = totalSlides;
+            updateSlideVisibility();
+        }
+
+        // Ovládání šipkami na klávesnici
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'Space') {
+                changeSlide(1);
+            } else if (e.key === 'ArrowLeft') {
+                changeSlide(-1);
+            }
+        });
+
+        // Initialize state
+        updateSlideVisibility();
+
+        function initChart() {
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Týden 1', 'Týden 2', 'Týden 3', 'Týden 4'],
+                    datasets: [
+                        { 
+                            label: 'Průměr zaměstnance', 
+                            data: [12, 10, 9, 11], 
+                            backgroundColor: '#78be20',
+                            borderRadius: 4
+                        },
+                        { 
+                            label: 'Průměr celé prodejny', 
+                            data: [18, 17, 19, 18], 
+                            backgroundColor: '#005b9f',
+                            borderRadius: 4
+                        }
+                    ]
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { font: { size: 14 } } }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { font: { size: 13 } } },
+                        x: { ticks: { font: { size: 13 } } }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
